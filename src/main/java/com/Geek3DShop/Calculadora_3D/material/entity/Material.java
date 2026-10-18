@@ -17,10 +17,6 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Material {
 
-    public Material(String nome) {
-        this.nome = nome;
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -41,4 +37,8 @@ public class Material {
     private boolean deleted = false;
 
     private String nome;
+
+    public Material(String nome) {
+        this.nome = nome;
+    }
 }
