@@ -4,11 +4,14 @@ import com.Geek3DShop.Calculadora_3D.filamento.entity.Filamento;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface FilamentoRepository extends JpaRepository<Filamento, Integer> {
 
     Optional<Filamento> findByMaterialIdAndCorIgnoreCase(Integer id, String cor);
+
+    List<Filamento> findByActiveTrueAndDeletedFalseOrderByMaterialNomeAscCorAsc();
     
 }
