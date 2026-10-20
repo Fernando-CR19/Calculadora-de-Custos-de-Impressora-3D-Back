@@ -1,5 +1,6 @@
 package com.Geek3DShop.Calculadora_3D.material.service;
 
+import com.Geek3DShop.Calculadora_3D.filamento.repository.FilamentoRepository;
 import com.Geek3DShop.Calculadora_3D.material.dto.CreateMaterialRequestDto;
 import com.Geek3DShop.Calculadora_3D.material.dto.MaterialResponseDto;
 import com.Geek3DShop.Calculadora_3D.material.dto.UpdateMaterialDto;
@@ -19,9 +20,11 @@ import java.util.UUID;
 public class MaterialService {
 
     private final MaterialRepository materialRepository;
+    private final FilamentoRepository filamentoRepository;
 
-    public MaterialService(MaterialRepository materialRepository) {
+    public MaterialService(MaterialRepository materialRepository, FilamentoRepository filamentoRepository) {
         this.materialRepository = materialRepository;
+        this.filamentoRepository = filamentoRepository;
     }
 
     @Transactional
@@ -82,6 +85,6 @@ public class MaterialService {
 
         materialRepository.save(material);
 
-        // TODO: implementar lógica para fazer soft delete nos filamentos do material deletado
+        filamentoRepository.softDeleteFilamento(material.getId());
     }
 }

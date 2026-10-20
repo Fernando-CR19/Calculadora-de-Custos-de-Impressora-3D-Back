@@ -2,6 +2,8 @@ package com.Geek3DShop.Calculadora_3D.filamento.repository;
 
 import com.Geek3DShop.Calculadora_3D.filamento.entity.Filamento;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,4 +20,8 @@ public interface FilamentoRepository extends JpaRepository<Filamento, Integer> {
     Optional<Filamento> findByUuidAndActiveTrueAndDeletedFalse(UUID uuid);
 
     Optional<Filamento> findByCorIgnoreCaseAndMaterialUuidAndUuidNot(String cor, UUID materialUuid, UUID uuid);
+
+    @Modifying
+    @Query("UPDATE Filamento f SET f.active = false, f.deleted = true WHERE f.material.id = :materialId")
+    void softDeleteFilamento(Integer materialId);
 }
