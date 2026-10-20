@@ -2,6 +2,7 @@ package com.Geek3DShop.Calculadora_3D.filamento.service;
 
 import com.Geek3DShop.Calculadora_3D.filamento.dto.CreateFilamentoRequestDto;
 import com.Geek3DShop.Calculadora_3D.filamento.dto.FilamentoResponseDto;
+import com.Geek3DShop.Calculadora_3D.filamento.dto.UpdateFilamentoDto;
 import com.Geek3DShop.Calculadora_3D.filamento.entity.Filamento;
 import com.Geek3DShop.Calculadora_3D.filamento.repository.FilamentoRepository;
 import com.Geek3DShop.Calculadora_3D.material.entity.Material;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class FilamentoService {
@@ -59,5 +61,28 @@ public class FilamentoService {
     public List<FilamentoResponseDto> listFilamentos() {
         var list = filamentoRepository.findByActiveTrueAndDeletedFalseOrderByMaterialNomeAscCorAsc();
         return list.stream().map(FilamentoResponseDto::from).toList();
+    }
+
+    @Transactional()
+    public FilamentoResponseDto updateFilamento(UUID uuid, UpdateFilamentoDto filamentoDto) {
+        Filamento filamento = filamentoRepository.findByUuidAndActiveTrueAndDeletedFalse(uuid).orElseThrow(
+                () -> new ResourceNotFoundException("Filamento: " + uuid + " não encontrado")
+        );
+
+        Material material = materialRepository.findByUuidAndActiveTrueAndDeletedFalse(filamentoDto.uuidMaterial()).orElseThrow(
+                () -> new ResourceNotFoundException("Material: " + filamentoDto.uuidMaterial() + " não encontrado")
+        );
+
+        filamentoRepository.findByCorIgnoreCaseAndMaterialUuidAndUuidNot(filamentoDto.cor(), material.getUuid(), uuid).ifPresent(_ -> {
+            throw new ResourceAlreadyExistsException("Filamento: " + filamentoDto.cor() + " material: " + material.getNome() + " já existe");
+        });
+
+        filamento.setCor(filamentoDto.cor());
+        filamento.setPrecoKg(filamentoDto.precoKg());
+        filamento.setMaterial(material);
+
+        filamentoRepository.save(filamento);
+
+        return FilamentoResponseDto.from(filamento);
     }
 }

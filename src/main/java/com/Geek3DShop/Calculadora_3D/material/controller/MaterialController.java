@@ -31,7 +31,7 @@ public class MaterialController {
         return materialService.listMaterials();
     }
 
-    @PatchMapping("/{uuid}")
+    @PutMapping("/{uuid}")
     public MaterialResponseDto updateMaterial(@PathVariable UUID uuid, @Valid @RequestBody UpdateMaterialDto materialDto) {
         return materialService.updateMaterial(uuid, materialDto);
     }
