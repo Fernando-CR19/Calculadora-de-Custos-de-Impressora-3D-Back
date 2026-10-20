@@ -35,4 +35,10 @@ public class FilamentoController {
     public FilamentoResponseDto updateFilamento(@PathVariable UUID uuid, @Valid @RequestBody UpdateFilamentoDto filamentoDto) {
         return filamentoService.updateFilamento(uuid, filamentoDto);
     }
+
+    @DeleteMapping("/{uuid}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteFilamento(@PathVariable UUID uuid) {
+        filamentoService.deleteFilamento(uuid);
+    }
 }

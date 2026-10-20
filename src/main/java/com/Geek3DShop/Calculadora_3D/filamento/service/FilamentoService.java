@@ -85,4 +85,16 @@ public class FilamentoService {
 
         return FilamentoResponseDto.from(filamento);
     }
+
+    @Transactional()
+    public void deleteFilamento(UUID uuid) {
+        Filamento filamento = filamentoRepository.findByUuidAndActiveTrueAndDeletedFalse(uuid).orElseThrow(
+                () -> new ResourceNotFoundException("Filamento: " + uuid + " não encontrado")
+        );
+
+        filamento.setActive(false);
+        filamento.setDeleted(true);
+
+        filamentoRepository.save(filamento);
+    }
 }
