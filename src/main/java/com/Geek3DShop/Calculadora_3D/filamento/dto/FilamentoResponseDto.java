@@ -13,7 +13,7 @@ public record FilamentoResponseDto(UUID uuid, String cor, BigDecimal precoKg, Ma
         var cor = filamento.getCor();
         var precoKg = filamento.getPrecoKg();
         var material = filamento.getMaterial();
-        MaterialResponseDto materialDto = new MaterialResponseDto(material.getUuid(), material.getNome());
+        MaterialResponseDto materialDto = MaterialResponseDto.from(material);
 
         return new FilamentoResponseDto(uuid, cor, precoKg, materialDto);
     }

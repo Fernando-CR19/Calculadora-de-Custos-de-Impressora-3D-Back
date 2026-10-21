@@ -8,6 +8,7 @@ import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceAlreadyExistsExcep
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -44,5 +45,11 @@ public class ConsumivelService {
         var entitySaved = consumivelRepository.save(entity);
 
         return ConsumivelResponseDto.from(entitySaved);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ConsumivelResponseDto> listConsumiveis () {
+        var list = consumivelRepository.findByActiveTrueAndDeletedFalseOrderByNomeAsc();
+        return list.stream().map(ConsumivelResponseDto::from).toList();
     }
 }

@@ -41,7 +41,7 @@ public class MaterialService {
 
                 materialRepository.save(materialFound);
 
-                return new MaterialResponseDto(materialFound.getUuid(), materialFound.getNome());
+                return MaterialResponseDto.from(materialFound);
             }
 
             throw new ResourceAlreadyExistsException("Material: " + materialDto.nome() + " já está cadastrado");
@@ -49,12 +49,13 @@ public class MaterialService {
 
         var entity = new Material(materialDto.nome());
         var entitySaved = materialRepository.save(entity);
-        return new MaterialResponseDto(entitySaved.getUuid(), entitySaved.getNome());
+        return MaterialResponseDto.from(entitySaved);
     }
 
+    @Transactional(readOnly = true)
     public List<MaterialResponseDto> listMaterials() {
         var list = materialRepository.findByActiveTrueAndDeletedFalseOrderByNomeAsc();
-        return list.stream().map(material -> new MaterialResponseDto(material.getUuid(), material.getNome())).toList();
+        return list.stream().map(MaterialResponseDto::from).toList();
     }
 
     @Transactional
@@ -71,7 +72,7 @@ public class MaterialService {
 
         materialRepository.save(material);
 
-        return new MaterialResponseDto(material.getUuid(), material.getNome());
+        return MaterialResponseDto.from(material);
     }
 
     @Transactional

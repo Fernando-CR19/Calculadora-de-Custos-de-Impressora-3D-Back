@@ -7,6 +7,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/consumiveis")
 public class ConsumivelController {
@@ -20,5 +22,10 @@ public class ConsumivelController {
     @ResponseStatus(HttpStatus.CREATED)
     public ConsumivelResponseDto createConsumivel(@Valid @RequestBody CreateConsumivelRequestDto consumivelDto) {
         return consumivelService.createConsumivel(consumivelDto);
+    }
+
+    @GetMapping()
+    public List<ConsumivelResponseDto> listConsumiveis() {
+        return consumivelService.listConsumiveis();
     }
 }
