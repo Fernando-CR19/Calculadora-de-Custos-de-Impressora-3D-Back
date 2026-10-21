@@ -63,7 +63,7 @@ public class FilamentoService {
         return list.stream().map(FilamentoResponseDto::from).toList();
     }
 
-    @Transactional()
+    @Transactional
     public FilamentoResponseDto updateFilamento(UUID uuid, UpdateFilamentoDto filamentoDto) {
         Filamento filamento = filamentoRepository.findByUuidAndActiveTrueAndDeletedFalse(uuid).orElseThrow(
                 () -> new ResourceNotFoundException("Filamento: " + uuid + " não encontrado")
@@ -86,7 +86,7 @@ public class FilamentoService {
         return FilamentoResponseDto.from(filamento);
     }
 
-    @Transactional()
+    @Transactional
     public void deleteFilamento(UUID uuid) {
         Filamento filamento = filamentoRepository.findByUuidAndActiveTrueAndDeletedFalse(uuid).orElseThrow(
                 () -> new ResourceNotFoundException("Filamento: " + uuid + " não encontrado")

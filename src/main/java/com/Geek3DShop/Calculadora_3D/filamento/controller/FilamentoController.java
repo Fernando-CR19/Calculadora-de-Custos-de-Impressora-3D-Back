@@ -20,13 +20,13 @@ public class FilamentoController {
         this.filamentoService = filamentoService;
     }
 
-    @PostMapping()
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public FilamentoResponseDto createFilamento(@Valid @RequestBody CreateFilamentoRequestDto filamentoRequestDto) {
         return filamentoService.createFilamento(filamentoRequestDto);
     }
 
-    @GetMapping()
+    @GetMapping
     public List<FilamentoResponseDto> listFilamentos() {
         return filamentoService.listFilamentos();
     }

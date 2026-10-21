@@ -20,13 +20,13 @@ public class ConsumivelController {
         this.consumivelService = consumivelService;
     }
 
-    @PostMapping()
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ConsumivelResponseDto createConsumivel(@Valid @RequestBody CreateConsumivelRequestDto consumivelDto) {
         return consumivelService.createConsumivel(consumivelDto);
     }
 
-    @GetMapping()
+    @GetMapping
     public List<ConsumivelResponseDto> listConsumiveis() {
         return consumivelService.listConsumiveis();
     }

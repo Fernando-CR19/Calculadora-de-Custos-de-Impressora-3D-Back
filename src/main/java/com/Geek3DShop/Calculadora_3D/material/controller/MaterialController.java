@@ -20,13 +20,13 @@ public class MaterialController {
         this.materialService = materialService;
     }
 
-    @PostMapping()
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public MaterialResponseDto createMaterial(@Valid @RequestBody CreateMaterialRequestDto materialRequestDto) {
         return materialService.createMaterial(materialRequestDto);
     }
 
-    @GetMapping()
+    @GetMapping
     public List<MaterialResponseDto> listMaterials() {
         return materialService.listMaterials();
     }
