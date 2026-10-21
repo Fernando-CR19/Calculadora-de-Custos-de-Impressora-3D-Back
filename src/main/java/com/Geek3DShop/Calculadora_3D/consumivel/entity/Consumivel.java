@@ -9,6 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -47,5 +48,12 @@ public class Consumivel {
         this.nome = nome;
         this.precoKit = precoKit;
         this.quantidadeKit = quantidadeKit;
-    };
+    }
+
+    public BigDecimal calcularPrecoUnitario (){
+
+        BigDecimal quantidadeKitDecimal = new BigDecimal(this.quantidadeKit);
+
+        return precoKit.divide(quantidadeKitDecimal, 4, RoundingMode.HALF_UP);
+    }
 }
