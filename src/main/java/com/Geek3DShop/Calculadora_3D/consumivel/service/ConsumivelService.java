@@ -74,4 +74,16 @@ public class ConsumivelService {
 
         return ConsumivelResponseDto.from(consumivel);
     }
+
+    @Transactional
+    public void deleteConsumivel(UUID uuid) {
+        Consumivel consumivel = consumivelRepository.findByUuidAndActiveTrueAndDeletedFalse(uuid).orElseThrow(
+            () -> new ResourceNotFoundException("Consumível: "+ uuid + " não foi encontrado")
+        );
+
+        consumivel.setActive(false);
+        consumivel.setDeleted(true);
+
+        consumivelRepository.save(consumivel);
+    }
 }

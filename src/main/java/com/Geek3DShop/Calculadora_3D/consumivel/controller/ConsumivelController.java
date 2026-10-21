@@ -35,4 +35,10 @@ public class ConsumivelController {
     public ConsumivelResponseDto updateConsumivel(@PathVariable UUID uuid, @Valid @RequestBody UpdateConsumivelDto consumivelDto) {
         return consumivelService.updateConsumivel(uuid, consumivelDto);
     }
+
+    @DeleteMapping("/{uuid}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteConsumivel(@PathVariable UUID uuid) {
+        consumivelService.deleteConsumivel(uuid);
+    }
 }
