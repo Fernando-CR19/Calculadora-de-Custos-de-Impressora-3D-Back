@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface ConsumivelRepository extends JpaRepository<Consumivel, Integer> {
@@ -13,5 +14,9 @@ public interface ConsumivelRepository extends JpaRepository<Consumivel, Integer>
     Optional<Consumivel> findByNomeIgnoreCase(String nome);
 
     List<Consumivel> findByActiveTrueAndDeletedFalseOrderByNomeAsc();
+
+    Optional<Consumivel> findByUuidAndActiveTrueAndDeletedFalse(UUID uuid);
+
+    Optional<Consumivel> findByNomeIgnoreCaseAndUuidNot(String nome, UUID uuid);
 
 }
