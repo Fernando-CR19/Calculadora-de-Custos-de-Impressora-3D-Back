@@ -50,7 +50,7 @@ public class Consumivel {
         this.quantidadeKit = quantidadeKit;
     }
 
-    public BigDecimal calcularPrecoUnitario (){
+    public BigDecimal calcularPrecoUnitario() {
 
         BigDecimal quantidadeKitDecimal = new BigDecimal(this.quantidadeKit);
 
