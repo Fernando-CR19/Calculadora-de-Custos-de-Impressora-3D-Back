@@ -50,6 +50,6 @@ public class NivelDesperdicio {
     public BigDecimal calcularFatorDesperdicio() {
         BigDecimal divisor = new BigDecimal("100");
 
-        return BigDecimal.ONE.add(percentual.divide(divisor, 4, RoundingMode.HALF_UP));
+        return BigDecimal.ONE.add(percentual.divide(divisor, 4, RoundingMode.HALF_UP)).stripTrailingZeros();
     }
 }
