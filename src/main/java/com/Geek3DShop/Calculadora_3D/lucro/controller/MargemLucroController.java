@@ -2,12 +2,14 @@ package com.Geek3DShop.Calculadora_3D.lucro.controller;
 
 import com.Geek3DShop.Calculadora_3D.lucro.dto.CreateMargemLucroRequestDto;
 import com.Geek3DShop.Calculadora_3D.lucro.dto.MargemLucroResponseDto;
+import com.Geek3DShop.Calculadora_3D.lucro.dto.UpdateMargemLucroDto;
 import com.Geek3DShop.Calculadora_3D.lucro.service.MargemLucroService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/margens-lucro")
@@ -27,5 +29,10 @@ public class MargemLucroController {
     @GetMapping
     public List<MargemLucroResponseDto> listMargensLucro() {
         return margemLucroService.listMargensLucro();
+    }
+
+    @PutMapping("/{uuid}")
+    public MargemLucroResponseDto updateMargemLucro(@PathVariable UUID uuid, @Valid @RequestBody UpdateMargemLucroDto updateMargemLucroDto) {
+        return margemLucroService.updateMargemLucro(uuid, updateMargemLucroDto);
     }
 }

@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface MargemLucroRepository extends JpaRepository<MargemLucro, Integer> {
@@ -15,5 +17,11 @@ public interface MargemLucroRepository extends JpaRepository<MargemLucro, Intege
     boolean existsByPercentualAndDeletedFalse(BigDecimal percentual);
 
     List<MargemLucro> findByDeletedFalseAndActiveTrueOrderByPercentualAsc();
+
+    Optional<MargemLucro> findByUuidAndActiveTrueAndDeletedFalse(UUID uuid);
+
+    boolean existsByNomeIgnoreCaseAndDeletedFalseAndUuidNot(String nome, UUID uuid);
+
+    boolean existsByPercentualAndDeletedFalseAndUuidNot(BigDecimal percentual, UUID uuid);
 
 }

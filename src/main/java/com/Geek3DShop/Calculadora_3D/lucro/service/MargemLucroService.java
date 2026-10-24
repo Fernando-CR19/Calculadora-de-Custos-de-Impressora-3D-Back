@@ -2,13 +2,16 @@ package com.Geek3DShop.Calculadora_3D.lucro.service;
 
 import com.Geek3DShop.Calculadora_3D.lucro.dto.CreateMargemLucroRequestDto;
 import com.Geek3DShop.Calculadora_3D.lucro.dto.MargemLucroResponseDto;
+import com.Geek3DShop.Calculadora_3D.lucro.dto.UpdateMargemLucroDto;
 import com.Geek3DShop.Calculadora_3D.lucro.entity.MargemLucro;
 import com.Geek3DShop.Calculadora_3D.lucro.repository.MargemLucroRepository;
 import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceAlreadyExistsException;
+import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class MargemLucroService {
@@ -38,5 +41,27 @@ public class MargemLucroService {
     public List<MargemLucroResponseDto> listMargensLucro() {
         var list = margemLucroRepository.findByDeletedFalseAndActiveTrueOrderByPercentualAsc();
         return list.stream().map(MargemLucroResponseDto::from).toList();
+    }
+
+    @Transactional
+    public MargemLucroResponseDto updateMargemLucro(UUID uuid, UpdateMargemLucroDto updateMargemLucroDto) {
+        MargemLucro margemLucro = margemLucroRepository.findByUuidAndActiveTrueAndDeletedFalse(uuid).orElseThrow(
+                () -> new ResourceNotFoundException("Margem de lucro: " + uuid + " não foi encontrada")
+        );
+
+        if (margemLucroRepository.existsByNomeIgnoreCaseAndDeletedFalseAndUuidNot(updateMargemLucroDto.nome(), uuid)) {
+            throw new ResourceAlreadyExistsException("Margem de lucro com nome: " + updateMargemLucroDto.nome() + " já está cadastrada");
+        }
+
+        if (margemLucroRepository.existsByPercentualAndDeletedFalseAndUuidNot(updateMargemLucroDto.percentual(), uuid)) {
+            throw new ResourceAlreadyExistsException("Margem de lucro com percentual: " + updateMargemLucroDto.percentual() + " já está cadastrada");
+        }
+
+        margemLucro.setNome(updateMargemLucroDto.nome());
+        margemLucro.setPercentual(updateMargemLucroDto.percentual());
+
+        margemLucroRepository.save(margemLucro);
+
+        return MargemLucroResponseDto.from(margemLucro);
     }
 }
