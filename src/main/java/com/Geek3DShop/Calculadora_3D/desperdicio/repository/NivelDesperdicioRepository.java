@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface NivelDesperdicioRepository extends JpaRepository<NivelDesperdicio, Integer> {
@@ -15,5 +17,11 @@ public interface NivelDesperdicioRepository extends JpaRepository<NivelDesperdic
     boolean existsByPercentualAndDeletedFalse(BigDecimal percentual);
 
     List<NivelDesperdicio> findByDeletedFalseAndActiveTrueOrderByPercentualAsc();
+
+    Optional<NivelDesperdicio> findByUuidAndDeletedFalseAndActiveTrue(UUID uuid);
+
+    boolean existsByNomeIgnoreCaseAndDeletedFalseAndUuidNot(String nomem, UUID uuid);
+
+    boolean existsByPercentualAndDeletedFalseAndUuidNot(BigDecimal percentual, UUID uuid);
 
 }
