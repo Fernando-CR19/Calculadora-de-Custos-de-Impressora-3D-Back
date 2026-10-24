@@ -4,6 +4,13 @@ import com.Geek3DShop.Calculadora_3D.lucro.entity.MargemLucro;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
+
 @Repository
 public interface MargemLucroRepository extends JpaRepository<MargemLucro, Integer> {
+
+    boolean existsByNomeIgnoreCaseAndDeletedFalse(String nome);
+
+    boolean existsByPercentualAndDeletedFalse(BigDecimal percentual);
+
 }
