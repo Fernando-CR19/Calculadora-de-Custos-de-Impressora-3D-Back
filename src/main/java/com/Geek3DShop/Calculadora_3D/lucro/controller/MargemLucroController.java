@@ -7,6 +7,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/margens-lucro")
 public class MargemLucroController {
@@ -20,5 +22,10 @@ public class MargemLucroController {
     @ResponseStatus(HttpStatus.CREATED)
     public MargemLucroResponseDto createMargemLucro(@Valid @RequestBody CreateMargemLucroRequestDto margemLucroRequestDto) {
         return margemLucroService.createMargemLucro(margemLucroRequestDto);
+    }
+
+    @GetMapping
+    public List<MargemLucroResponseDto> listMargensLucro() {
+        return margemLucroService.listMargensLucro();
     }
 }

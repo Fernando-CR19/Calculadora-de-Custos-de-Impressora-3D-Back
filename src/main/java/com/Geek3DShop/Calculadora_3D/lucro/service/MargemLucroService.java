@@ -8,6 +8,8 @@ import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceAlreadyExistsExcep
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class MargemLucroService {
     private final MargemLucroRepository margemLucroRepository;
@@ -30,5 +32,11 @@ public class MargemLucroService {
         var entitySaved = margemLucroRepository.save(entity);
 
         return MargemLucroResponseDto.from(entitySaved);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MargemLucroResponseDto> listMargensLucro() {
+        var list = margemLucroRepository.findByDeletedFalseAndActiveTrueOrderByPercentualAsc();
+        return list.stream().map(MargemLucroResponseDto::from).toList();
     }
 }
