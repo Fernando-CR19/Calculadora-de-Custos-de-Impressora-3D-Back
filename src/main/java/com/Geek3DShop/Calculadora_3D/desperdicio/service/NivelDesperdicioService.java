@@ -8,6 +8,7 @@ import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceAlreadyExistsExcep
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -32,5 +33,11 @@ public class NivelDesperdicioService {
         var entitySaved = nivelDesperdicioRepository.save(entity);
 
         return NivelDesperdicioResponseDto.from(entitySaved);
+    }
+
+    @Transactional(readOnly = true)
+    public List<NivelDesperdicioResponseDto> listNiveisDesperdicio() {
+        var list = nivelDesperdicioRepository.findByDeletedFalseAndActiveTrueOrderByPercentualAsc();
+        return list.stream().map(NivelDesperdicioResponseDto::from).toList();
     }
 }

@@ -7,6 +7,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/niveis-desperdicio")
 public class NivelDesperdicioController {
@@ -20,6 +22,11 @@ public class NivelDesperdicioController {
     @ResponseStatus(HttpStatus.CREATED)
     public NivelDesperdicioResponseDto createNivelDesperdicio(@Valid @RequestBody CreateNivelDesperdicioRequestDto nivelDesperdicioDto) {
         return nivelDesperdicioService.createNivelDesperdicio(nivelDesperdicioDto);
+    }
+
+    @GetMapping
+    public List<NivelDesperdicioResponseDto> listNiveisDesperdicio() {
+        return nivelDesperdicioService.listNiveisDesperdicio();
     }
 
 }
