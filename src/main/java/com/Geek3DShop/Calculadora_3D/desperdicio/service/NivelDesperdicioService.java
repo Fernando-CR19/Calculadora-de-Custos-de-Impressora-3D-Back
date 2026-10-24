@@ -63,6 +63,17 @@ public class NivelDesperdicioService {
         nivelDesperdicioRepository.save(nivelDesperdicio);
 
         return NivelDesperdicioResponseDto.from(nivelDesperdicio);
+    }
 
+    @Transactional
+    public void deleteNivelDesperdicio(UUID uuid) {
+        NivelDesperdicio nivelDesperdicio = nivelDesperdicioRepository.findByUuidAndDeletedFalseAndActiveTrue(uuid).orElseThrow(
+                () -> new ResourceNotFoundException("Nível de Desperdício: " + uuid + " não foi encontrado")
+        );
+
+        nivelDesperdicio.setActive(false);
+        nivelDesperdicio.setDeleted(true);
+
+        nivelDesperdicioRepository.save(nivelDesperdicio);
     }
 }

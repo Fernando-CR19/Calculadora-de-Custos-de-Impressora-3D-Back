@@ -35,4 +35,10 @@ public class NivelDesperdicioController {
     public NivelDesperdicioResponseDto updateNivelDesperdicio(@PathVariable UUID uuid, @Valid @RequestBody UpdateNivelDesperdicioDto nivelDesperdicioDto) {
         return nivelDesperdicioService.updateNivelDesperdicio(uuid, nivelDesperdicioDto);
     }
+
+    @DeleteMapping("/{uuid}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteNivelDesperdicio(@PathVariable UUID uuid) {
+        nivelDesperdicioService.deleteNivelDesperdicio(uuid);
+    }
 }
