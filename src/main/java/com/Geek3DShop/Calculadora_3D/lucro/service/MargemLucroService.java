@@ -64,4 +64,16 @@ public class MargemLucroService {
 
         return MargemLucroResponseDto.from(margemLucro);
     }
+
+    @Transactional
+    public void deleteMargemLucro(UUID uuid) {
+        MargemLucro margemLucro = margemLucroRepository.findByUuidAndActiveTrueAndDeletedFalse(uuid).orElseThrow(
+                () -> new ResourceNotFoundException("A margem de lucro: " + uuid + " não foi encontrada")
+        );
+
+        margemLucro.setActive(false);
+        margemLucro.setDeleted(true);
+
+        margemLucroRepository.save(margemLucro);
+    }
 }

@@ -35,4 +35,10 @@ public class MargemLucroController {
     public MargemLucroResponseDto updateMargemLucro(@PathVariable UUID uuid, @Valid @RequestBody UpdateMargemLucroDto updateMargemLucroDto) {
         return margemLucroService.updateMargemLucro(uuid, updateMargemLucroDto);
     }
+
+    @DeleteMapping("/{uuid}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteMargemLucro(@PathVariable UUID uuid) {
+        margemLucroService.deleteMargemLucro(uuid);
+    }
 }
