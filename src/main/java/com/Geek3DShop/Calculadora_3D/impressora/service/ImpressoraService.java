@@ -2,14 +2,17 @@ package com.Geek3DShop.Calculadora_3D.impressora.service;
 
 import com.Geek3DShop.Calculadora_3D.impressora.dto.CreateImpressoraRequestDto;
 import com.Geek3DShop.Calculadora_3D.impressora.dto.ImpressoraResponseDto;
+import com.Geek3DShop.Calculadora_3D.impressora.dto.UpdateImpressoraDto;
 import com.Geek3DShop.Calculadora_3D.impressora.entity.Impressora;
 import com.Geek3DShop.Calculadora_3D.impressora.repository.ImpressoraRepository;
 import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceAlreadyExistsException;
+import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class ImpressoraService {
@@ -58,5 +61,25 @@ public class ImpressoraService {
     public List<ImpressoraResponseDto> listImpressoras() {
         var list = impressoraRepository.findByActiveTrueAndDeletedFalseOrderByNomeAsc();
         return list.stream().map(ImpressoraResponseDto::from).toList();
+    }
+
+    @Transactional
+    public ImpressoraResponseDto updateImpressora(UUID uuid, UpdateImpressoraDto updateImpressoraDto) {
+        Impressora impressora = impressoraRepository.findByUuidAndActiveTrueAndDeletedFalse(uuid).orElseThrow(
+                () -> new ResourceNotFoundException("Impressora: " + uuid + " não foi encontrada")
+        );
+
+        impressoraRepository.findByNomeIgnoreCaseAndUuidNot(updateImpressoraDto.nome(), uuid).ifPresent(_ -> {
+            throw new ResourceAlreadyExistsException("Impressora: " + updateImpressoraDto.nome() + " já está cadastrada");
+        });
+
+        impressora.setNome(updateImpressoraDto.nome());
+        impressora.setCustoAquisicao(updateImpressoraDto.custoAquisicao());
+        impressora.setVidaUtilHoras(updateImpressoraDto.vidaUtilHoras());
+        impressora.setPotenciaMediaAmsW(updateImpressoraDto.potenciaMediaAmsW());
+
+        impressoraRepository.save(impressora);
+
+        return ImpressoraResponseDto.from(impressora);
     }
 }

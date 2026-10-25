@@ -18,7 +18,7 @@ public record CreateImpressoraRequestDto(
         @PositiveOrZero(message = "A potência média do AMS não pode ser negativa")
         @Digits(integer = 4, fraction = 2, message = "A potência média precisa ter no máximo quatro dígitos inteiros e dois decimais") BigDecimal potenciaMediaAmsW
 
-        ) {
+) {
 
     public CreateImpressoraRequestDto {
         if (nome != null) {
