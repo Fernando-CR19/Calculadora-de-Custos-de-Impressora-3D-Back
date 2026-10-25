@@ -1,0 +1,48 @@
+package com.Geek3DShop.Calculadora_3D.potencia.service;
+
+import com.Geek3DShop.Calculadora_3D.impressora.entity.Impressora;
+import com.Geek3DShop.Calculadora_3D.impressora.repository.ImpressoraRepository;
+import com.Geek3DShop.Calculadora_3D.material.entity.Material;
+import com.Geek3DShop.Calculadora_3D.material.repository.MaterialRepository;
+import com.Geek3DShop.Calculadora_3D.potencia.dto.CreatePotenciaImpressoraRequestDto;
+import com.Geek3DShop.Calculadora_3D.potencia.dto.PotenciaImpressoraResponseDto;
+import com.Geek3DShop.Calculadora_3D.potencia.entity.PotenciaImpressora;
+import com.Geek3DShop.Calculadora_3D.potencia.repository.PotenciaImpressoraRepository;
+import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceAlreadyExistsException;
+import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceNotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
+
+@Service
+public class PotenciaImpressoraService {
+    private final PotenciaImpressoraRepository potenciaImpressoraRepository;
+    private final ImpressoraRepository impressoraRepository;
+    private final MaterialRepository materialRepository;
+
+    public PotenciaImpressoraService(PotenciaImpressoraRepository potenciaImpressoraRepository, ImpressoraRepository impressoraRepository, MaterialRepository materialRepository) {
+        this.potenciaImpressoraRepository = potenciaImpressoraRepository;
+        this.impressoraRepository = impressoraRepository;
+        this.materialRepository = materialRepository;
+    }
+
+    @Transactional
+    public PotenciaImpressoraResponseDto createPotenciaImpressora(UUID uuidImpressora, CreatePotenciaImpressoraRequestDto createPotenciaImpressoraRequestDto) {
+        Impressora impressora = impressoraRepository.findByUuidAndActiveTrueAndDeletedFalse(uuidImpressora).orElseThrow(
+                () -> new ResourceNotFoundException("Impressora: " + uuidImpressora + " não foi encontrada")
+        );
+
+        Material material = materialRepository.findByUuidAndActiveTrueAndDeletedFalse(createPotenciaImpressoraRequestDto.uuidMaterial()).orElseThrow(
+                () -> new ResourceNotFoundException("Material: " + createPotenciaImpressoraRequestDto.uuidMaterial() + " não foi encontrado")
+        );
+
+        if (potenciaImpressoraRepository.existsByImpressoraIdAndMaterialId(impressora.getId(), material.getId())) {
+            throw new ResourceAlreadyExistsException("A impressora já tem potência cadastrada para esse material");
+        }
+
+        var entity = new PotenciaImpressora(material, impressora, createPotenciaImpressoraRequestDto.potenciaMediaW());
+        var entitySaved = potenciaImpressoraRepository.save(entity);
+        return PotenciaImpressoraResponseDto.from(entitySaved);
+    }
+}
