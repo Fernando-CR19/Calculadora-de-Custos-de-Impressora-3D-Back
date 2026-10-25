@@ -82,4 +82,18 @@ public class ImpressoraService {
 
         return ImpressoraResponseDto.from(impressora);
     }
+
+    @Transactional
+    public void deleteImpressora(UUID uuid) {
+        Impressora impressora = impressoraRepository.findByUuidAndActiveTrueAndDeletedFalse(uuid).orElseThrow(
+            () -> new ResourceNotFoundException("Impressora: " + uuid + " não foi encontrada")
+        );
+
+        impressora.setActive(false);
+        impressora.setDeleted(true);
+
+        impressoraRepository.save(impressora);
+
+        // TODO: implementar o delete da impressora_material
+    }
 }

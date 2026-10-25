@@ -35,4 +35,10 @@ public class ImpressoraController {
     public ImpressoraResponseDto updateImpressora(@PathVariable UUID uuid, @Valid @RequestBody UpdateImpressoraDto updateImpressoraDto) {
         return impressoraService.updateImpressora(uuid, updateImpressoraDto);
     }
+
+    @DeleteMapping("/{uuid}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteImpressora(@PathVariable UUID uuid) {
+        impressoraService.deleteImpressora(uuid);
+    }
 }
