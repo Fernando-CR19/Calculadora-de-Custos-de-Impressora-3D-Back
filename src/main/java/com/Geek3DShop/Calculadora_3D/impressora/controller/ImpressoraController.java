@@ -7,6 +7,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/impressoras")
 public class ImpressoraController {
@@ -22,5 +24,8 @@ public class ImpressoraController {
         return impressoraService.createImpressora(createImpressoraRequestDto);
     }
 
-
+    @GetMapping
+    public List<ImpressoraResponseDto> listImpressoras() {
+        return impressoraService.listImpressoras();
+    }
 }

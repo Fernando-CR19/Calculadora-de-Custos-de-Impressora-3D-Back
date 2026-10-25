@@ -8,6 +8,7 @@ import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceAlreadyExistsExcep
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -51,5 +52,11 @@ public class ImpressoraService {
         var entitySaved = impressoraRepository.save(entity);
 
         return ImpressoraResponseDto.from(entitySaved);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ImpressoraResponseDto> listImpressoras() {
+        var list = impressoraRepository.findByActiveTrueAndDeletedFalseOrderByNomeAsc();
+        return list.stream().map(ImpressoraResponseDto::from).toList();
     }
 }
