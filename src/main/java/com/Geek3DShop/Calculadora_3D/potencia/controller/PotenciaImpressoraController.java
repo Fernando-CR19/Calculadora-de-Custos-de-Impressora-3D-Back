@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -22,5 +23,10 @@ public class PotenciaImpressoraController {
     @ResponseStatus(HttpStatus.CREATED)
     public PotenciaImpressoraResponseDto createPotenciaImpressora(@PathVariable UUID uuidImpressora, @Valid @RequestBody CreatePotenciaImpressoraRequestDto potenciaImpressoraRequestDto) {
         return potenciaImpressoraService.createPotenciaImpressora(uuidImpressora, potenciaImpressoraRequestDto);
+    }
+
+    @GetMapping
+    public List<PotenciaImpressoraResponseDto> listPotenciasImpressora(@PathVariable UUID uuidImpressora) {
+        return potenciaImpressoraService.listPotenciasImpressora(uuidImpressora);
     }
 }

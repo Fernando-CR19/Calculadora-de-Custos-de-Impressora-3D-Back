@@ -13,6 +13,7 @@ import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -44,5 +45,15 @@ public class PotenciaImpressoraService {
         var entity = new PotenciaImpressora(material, impressora, createPotenciaImpressoraRequestDto.potenciaMediaW());
         var entitySaved = potenciaImpressoraRepository.save(entity);
         return PotenciaImpressoraResponseDto.from(entitySaved);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PotenciaImpressoraResponseDto> listPotenciasImpressora(UUID uuidImpressora) {
+        Impressora impressora = impressoraRepository.findByUuidAndActiveTrueAndDeletedFalse(uuidImpressora).orElseThrow(
+                () -> new ResourceNotFoundException("Impressora: " + uuidImpressora + " não foi encontrada")
+        );
+
+        var lista = potenciaImpressoraRepository.findByImpressoraIdAndMaterialActiveTrueAndMaterialDeletedFalseOrderByMaterialNomeAsc(impressora.getId());
+        return lista.stream().map(PotenciaImpressoraResponseDto::from).toList();
     }
 }
