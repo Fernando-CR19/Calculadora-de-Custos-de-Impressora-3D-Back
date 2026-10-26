@@ -4,6 +4,7 @@ import com.Geek3DShop.Calculadora_3D.acabamento.dto.AcabamentoRequestDto;
 import com.Geek3DShop.Calculadora_3D.acabamento.dto.AcabamentoResponseDto;
 import com.Geek3DShop.Calculadora_3D.acabamento.entity.Acabamento;
 import com.Geek3DShop.Calculadora_3D.acabamento.repository.AcabamentoRepository;
+import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,4 +36,12 @@ public class AcabamentoService {
         return AcabamentoResponseDto.from(entitySaved);
     }
 
+    @Transactional(readOnly = true)
+    public AcabamentoResponseDto getAcabamento() {
+        var acabamento = acabamentoRepository.findFirstByOrderByIdAsc().orElseThrow(
+                () -> new ResourceNotFoundException("O valor da hora trabalhada no acabamento não foi cadastrado")
+        );
+
+        return AcabamentoResponseDto.from(acabamento);
+    }
 }

@@ -4,10 +4,7 @@ import com.Geek3DShop.Calculadora_3D.acabamento.dto.AcabamentoRequestDto;
 import com.Geek3DShop.Calculadora_3D.acabamento.dto.AcabamentoResponseDto;
 import com.Geek3DShop.Calculadora_3D.acabamento.service.AcabamentoService;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/acabamento")
@@ -21,5 +18,10 @@ public class AcabamentoController {
     @PutMapping
     public AcabamentoResponseDto upsertAcabamento(@Valid @RequestBody AcabamentoRequestDto acabamentoRequestDto) {
         return acabamentoService.upsertAcabamento(acabamentoRequestDto);
+    }
+
+    @GetMapping
+    public AcabamentoResponseDto getAcabamento() {
+        return acabamentoService.getAcabamento();
     }
 }
