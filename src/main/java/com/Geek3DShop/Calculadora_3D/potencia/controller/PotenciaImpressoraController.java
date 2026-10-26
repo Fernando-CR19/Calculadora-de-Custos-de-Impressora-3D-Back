@@ -2,6 +2,7 @@ package com.Geek3DShop.Calculadora_3D.potencia.controller;
 
 import com.Geek3DShop.Calculadora_3D.potencia.dto.CreatePotenciaImpressoraRequestDto;
 import com.Geek3DShop.Calculadora_3D.potencia.dto.PotenciaImpressoraResponseDto;
+import com.Geek3DShop.Calculadora_3D.potencia.dto.UpdatePotenciaImpressoraDto;
 import com.Geek3DShop.Calculadora_3D.potencia.service.PotenciaImpressoraService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -28,5 +29,10 @@ public class PotenciaImpressoraController {
     @GetMapping
     public List<PotenciaImpressoraResponseDto> listPotenciasImpressora(@PathVariable UUID uuidImpressora) {
         return potenciaImpressoraService.listPotenciasImpressora(uuidImpressora);
+    }
+
+    @PutMapping("/{uuidMaterial}")
+    public PotenciaImpressoraResponseDto updatePotenciaImpressora(@PathVariable UUID uuidImpressora, @PathVariable UUID uuidMaterial, @Valid @RequestBody UpdatePotenciaImpressoraDto updatePotenciaImpressoraDto) {
+        return potenciaImpressoraService.updatePotenciaImpressora(uuidImpressora,uuidMaterial, updatePotenciaImpressoraDto);
     }
 }

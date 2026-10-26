@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface PotenciaImpressoraRepository extends JpaRepository<PotenciaImpressora, Integer> {
@@ -12,5 +14,7 @@ public interface PotenciaImpressoraRepository extends JpaRepository<PotenciaImpr
     boolean existsByImpressoraIdAndMaterialId(Integer impressoraId, Integer materialId);
 
     List<PotenciaImpressora> findByImpressoraIdAndMaterialActiveTrueAndMaterialDeletedFalseOrderByMaterialNomeAsc(Integer impressoraId);
+
+    Optional<PotenciaImpressora> findByImpressoraUuidAndImpressoraActiveTrueAndImpressoraDeletedFalseAndMaterialUuidAndMaterialActiveTrueAndMaterialDeletedFalse (UUID uuidImpressora, UUID uuidMaterial);
 
 }
