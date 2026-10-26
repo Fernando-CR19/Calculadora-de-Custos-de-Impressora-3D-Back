@@ -71,4 +71,13 @@ public class PotenciaImpressoraService {
 
         return PotenciaImpressoraResponseDto.from(potenciaImpressora);
     }
+
+    @Transactional
+    public void deletePotenciaImpressora(UUID uuidImpressora, UUID uuidMaterial) {
+        PotenciaImpressora potenciaImpressora = potenciaImpressoraRepository.findByImpressoraUuidAndImpressoraActiveTrueAndImpressoraDeletedFalseAndMaterialUuidAndMaterialActiveTrueAndMaterialDeletedFalse(uuidImpressora, uuidMaterial).orElseThrow(
+                () -> new ResourceNotFoundException("Potência da impressora não foi encontrada")
+        );
+
+        potenciaImpressoraRepository.delete(potenciaImpressora);
+    }
 }

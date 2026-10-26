@@ -94,6 +94,6 @@ public class ImpressoraService {
 
         impressoraRepository.save(impressora);
 
-        // TODO: implementar o delete da impressora_material
+        // As potências não são apagadas, para o caso de uma impressora ser reativada, elas voltarem juntas
     }
 }

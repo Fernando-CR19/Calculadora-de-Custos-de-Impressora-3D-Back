@@ -35,4 +35,10 @@ public class PotenciaImpressoraController {
     public PotenciaImpressoraResponseDto updatePotenciaImpressora(@PathVariable UUID uuidImpressora, @PathVariable UUID uuidMaterial, @Valid @RequestBody UpdatePotenciaImpressoraDto updatePotenciaImpressoraDto) {
         return potenciaImpressoraService.updatePotenciaImpressora(uuidImpressora,uuidMaterial, updatePotenciaImpressoraDto);
     }
+
+    @DeleteMapping("/{uuidMaterial}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePotenciaImpressora(@PathVariable UUID uuidImpressora, @PathVariable UUID uuidMaterial) {
+        potenciaImpressoraService.deletePotenciaImpressora(uuidImpressora, uuidMaterial);
+    }
 }
