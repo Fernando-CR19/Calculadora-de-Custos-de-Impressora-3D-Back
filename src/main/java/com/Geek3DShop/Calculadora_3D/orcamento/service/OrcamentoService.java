@@ -56,6 +56,8 @@ public class OrcamentoService {
                 .add(resultadoImpressao.custoEnergia())
                 .add(resultadoImpressao.depreciacao());
 
+        var custoAcabamento = this.calcularAcabamento(orcamentoRequestDto.horasDeAcabamento(), orcamentoRequestDto.minutosDeAcabamento());
+
         return 0;
     }
 
@@ -148,6 +150,23 @@ public class OrcamentoService {
 
         var desperdicio = custoTotalFilamento.multiply(nivelDesperdicio.getPercentual());
         return desperdicio.divide(divisor, 4, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal calcularAcabamento(Integer horasDeAcabamento, Integer minutosDeAcabamento) {
+        if (horasDeAcabamento == 0 && minutosDeAcabamento == 0) {
+            return BigDecimal.ZERO;
+        }
+
+        var valorAcabamento = acabamentoRepository.findFirstByOrderByIdAsc().orElseThrow(
+                () -> new ResourceNotFoundException("O valor cobrado no acabamento ainda não foi cadastrado")
+        );
+
+        var valorPorMinuto = valorAcabamento.calcularValorPorMinuto();
+
+        var tempoTrabalhado = (horasDeAcabamento * 60) + minutosDeAcabamento;
+        BigDecimal tempoTrabalhadoDecimal = BigDecimal.valueOf(tempoTrabalhado);
+
+        return tempoTrabalhadoDecimal.multiply(valorPorMinuto);
     }
 
     private record ResultadoFilamento(
