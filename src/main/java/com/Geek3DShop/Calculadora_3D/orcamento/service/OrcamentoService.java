@@ -1,7 +1,6 @@
 package com.Geek3DShop.Calculadora_3D.orcamento.service;
 
 import com.Geek3DShop.Calculadora_3D.acabamento.repository.AcabamentoRepository;
-import com.Geek3DShop.Calculadora_3D.consumivel.entity.Consumivel;
 import com.Geek3DShop.Calculadora_3D.consumivel.repository.ConsumivelRepository;
 import com.Geek3DShop.Calculadora_3D.desperdicio.repository.NivelDesperdicioRepository;
 import com.Geek3DShop.Calculadora_3D.energia.repository.EnergiaRepository;
@@ -12,6 +11,7 @@ import com.Geek3DShop.Calculadora_3D.material.entity.Material;
 import com.Geek3DShop.Calculadora_3D.orcamento.dto.CustoFilamentoDto;
 import com.Geek3DShop.Calculadora_3D.orcamento.dto.FilamentoUsadoDto;
 import com.Geek3DShop.Calculadora_3D.orcamento.dto.OrcamentoRequestDto;
+import com.Geek3DShop.Calculadora_3D.orcamento.dto.OrcamentoResponseDto;
 import com.Geek3DShop.Calculadora_3D.potencia.repository.PotenciaImpressoraRepository;
 import com.Geek3DShop.Calculadora_3D.shared.exception.BusinessRuleException;
 import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceNotFoundException;
@@ -38,10 +38,8 @@ public class OrcamentoService {
     private final MargemLucroRepository margemLucroRepository;
     private final PotenciaImpressoraRepository potenciaImpressoraRepository;
 
-
-    // Trocar object por OrcamentoResponseDto depois, Object temporário para o código compilar.
     @Transactional(readOnly = true)
-    public Object calcularOrcamento(OrcamentoRequestDto orcamentoRequestDto) {
+    public OrcamentoResponseDto calcularOrcamento(OrcamentoRequestDto orcamentoRequestDto) {
         var resultadoFilamentos = this.calcularFilamentos(orcamentoRequestDto.filamentos());
 
         var resultadoImpressao = this.calcularCustoImpressao(
@@ -64,7 +62,25 @@ public class OrcamentoService {
 
         var custoTotal = custoBase.add(custoAcabamento).add(custoConsumiveis);
 
-        return 0;
+        var fatorLucro = this.buscarFatorLucro(orcamentoRequestDto.uuidMargemLucro());
+
+        var valorSugerido = custoTotal.multiply(fatorLucro);
+
+        return new OrcamentoResponseDto(
+                resultadoFilamentos.custosFilamento(),
+                resultadoImpressao.tempoImpressao(),
+                resultadoImpressao.energiaKwh(),
+                resultadoFilamentos.custoTotalFilamento().setScale(2, RoundingMode.HALF_UP),
+                custoDesperdicio.setScale(2, RoundingMode.HALF_UP),
+                resultadoImpressao.custoEnergia().setScale(2, RoundingMode.HALF_UP),
+                resultadoImpressao.depreciacao().setScale(2, RoundingMode.HALF_UP),
+                custoBase.setScale(2, RoundingMode.HALF_UP),
+                custoAcabamento.setScale(2, RoundingMode.HALF_UP),
+                custoConsumiveis.setScale(2, RoundingMode.HALF_UP),
+                custoTotal.setScale(2, RoundingMode.HALF_UP),
+                fatorLucro,
+                valorSugerido.setScale(2, RoundingMode.HALF_UP)
+        );
     }
 
     private ResultadoFilamento calcularFilamentos(List<FilamentoUsadoDto> filamentosUsados) {
@@ -192,6 +208,14 @@ public class OrcamentoService {
         }
 
         return custoTotalConsumiveis;
+    }
+
+    private BigDecimal buscarFatorLucro(UUID uuidMargemLucro) {
+        var margemLucro = margemLucroRepository.findByUuidAndActiveTrueAndDeletedFalse(uuidMargemLucro).orElseThrow(
+                () -> new ResourceNotFoundException("A margem de lucro: " + uuidMargemLucro + " não foi encontrada")
+        );
+
+        return margemLucro.calcularFatorLucro();
     }
 
     private record ResultadoFilamento(

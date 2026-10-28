@@ -26,7 +26,7 @@ public record OrcamentoResponseDto(
 
         BigDecimal custoTotal,
 
-        BigDecimal fatorucro,
+        BigDecimal fatorLucro,
 
         BigDecimal valorSugerido
 ) {
