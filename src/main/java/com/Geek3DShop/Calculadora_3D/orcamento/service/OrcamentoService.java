@@ -1,6 +1,7 @@
 package com.Geek3DShop.Calculadora_3D.orcamento.service;
 
 import com.Geek3DShop.Calculadora_3D.acabamento.repository.AcabamentoRepository;
+import com.Geek3DShop.Calculadora_3D.consumivel.entity.Consumivel;
 import com.Geek3DShop.Calculadora_3D.consumivel.repository.ConsumivelRepository;
 import com.Geek3DShop.Calculadora_3D.desperdicio.repository.NivelDesperdicioRepository;
 import com.Geek3DShop.Calculadora_3D.energia.repository.EnergiaRepository;
@@ -22,6 +23,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -57,6 +59,10 @@ public class OrcamentoService {
                 .add(resultadoImpressao.depreciacao());
 
         var custoAcabamento = this.calcularAcabamento(orcamentoRequestDto.horasDeAcabamento(), orcamentoRequestDto.minutosDeAcabamento());
+
+        var custoConsumiveis = this.calcularConsumiveis(orcamentoRequestDto.uuidsConsumiveis());
+
+        var custoTotal = custoBase.add(custoAcabamento).add(custoConsumiveis);
 
         return 0;
     }
@@ -167,6 +173,25 @@ public class OrcamentoService {
         BigDecimal tempoTrabalhadoDecimal = BigDecimal.valueOf(tempoTrabalhado);
 
         return tempoTrabalhadoDecimal.multiply(valorPorMinuto);
+    }
+
+    private BigDecimal calcularConsumiveis(Set<UUID> uuidsConsumiveis) {
+        if (uuidsConsumiveis.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+
+        var custoTotalConsumiveis = BigDecimal.ZERO;
+
+        for (UUID uuidConsumivel : uuidsConsumiveis) {
+            var consumivelFound = consumivelRepository.findByUuidAndActiveTrueAndDeletedFalse(uuidConsumivel).orElseThrow(
+                    () -> new ResourceNotFoundException("O consumível: " + uuidConsumivel + " não foi encontrado")
+            );
+
+            var precoUnitario = consumivelFound.calcularPrecoUnitario();
+            custoTotalConsumiveis = custoTotalConsumiveis.add(precoUnitario);
+        }
+
+        return custoTotalConsumiveis;
     }
 
     private record ResultadoFilamento(
