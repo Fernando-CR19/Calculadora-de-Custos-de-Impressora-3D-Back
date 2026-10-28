@@ -66,6 +66,20 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleBusinessRule(BusinessRuleException e, HttpServletRequest request) {
+        ErrorResponse errorDetails = new ErrorResponse(
+                OffsetDateTime.now(),
+                HttpStatus.UNPROCESSABLE_CONTENT.value(),
+                "Regra de negócio violada",
+                e.getMessage(),
+                request.getRequestURI(),
+                List.of()
+        );
+
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(errorDetails);
+    }
+
+    @ExceptionHandler
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException e, HttpServletRequest request) {
         List<ErrorDetail> errors = new ArrayList<>();
 
