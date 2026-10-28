@@ -51,6 +51,10 @@ public class OrcamentoService {
 
         var custoDesperdicio = this.calcularDesperdicio(orcamentoRequestDto.uuidNivelDesperdicio(), resultadoFilamentos.custoTotalFilamento());
 
+        var custoBase = resultadoFilamentos.custoTotalFilamento()
+                .add(custoDesperdicio)
+                .add(resultadoImpressao.custoEnergia())
+                .add(resultadoImpressao.depreciacao());
 
         return 0;
     }
@@ -113,18 +117,20 @@ public class OrcamentoService {
         );
 
         // Cálculo da energia gasta durante a impressão
-        BigDecimal divisor = new BigDecimal("1000");
         var potenciaMediaImpressora = potenciaImpressoraFound.getPotenciaMediaW();
         var potenciaMediaAms = impressoraFound.getPotenciaMediaAmsW();
         var potenciaMediaW = potenciaMediaImpressora.add(potenciaMediaAms);
+
+        BigDecimal divisor = new BigDecimal("1000");
         var energiaWh = potenciaMediaW.multiply(tempoImpressao);
         var energiaKwh = energiaWh.divide(divisor, 4, RoundingMode.HALF_UP);
+
         var energia = energiaRepository.findFirstByOrderByIdAsc().orElseThrow(
                 () -> new ResourceNotFoundException("Não há fatura de energia cadastrada")
         );
+
         var precokwh = energia.calcularPrecoKwh();
         var custoEnergia = energiaKwh.multiply(precokwh);
-
 
         // Cálculo da depreciação
         var depreciacaoPorHora = impressoraFound.calcularDepreciacaoPorHora();
@@ -140,8 +146,8 @@ public class OrcamentoService {
                 () -> new ResourceNotFoundException("Nível de desperdício: " + uuidNivelDesperdicio + " não foi encontrado")
         );
 
-        var partePerdida = custoTotalFilamento.multiply(nivelDesperdicio.getPercentual());
-        return partePerdida.divide(divisor, 4, RoundingMode.HALF_UP);
+        var desperdicio = custoTotalFilamento.multiply(nivelDesperdicio.getPercentual());
+        return desperdicio.divide(divisor, 4, RoundingMode.HALF_UP);
     }
 
     private record ResultadoFilamento(
