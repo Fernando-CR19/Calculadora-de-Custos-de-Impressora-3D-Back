@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +41,13 @@ public class OrcamentoService {
     @Transactional(readOnly = true)
     public Object calcularOrcamento(OrcamentoRequestDto orcamentoRequestDto) {
         var resultadoFilamentos = this.calcularFilamentos(orcamentoRequestDto.filamentos());
+
+        var resultadoImpressao = this.calcularCustoImpressao(
+                orcamentoRequestDto.horasDeImpressao(),
+                orcamentoRequestDto.minutosDeImpressao(),
+                orcamentoRequestDto.uuidImpressora(),
+                resultadoFilamentos.material()
+        );
 
 
         return 0;
@@ -86,10 +94,55 @@ public class OrcamentoService {
         return new ResultadoFilamento(custoFilamentos, custoTotalFilamento, material);
     }
 
+    private ResultadoImpressao calcularCustoImpressao(Integer horasDeImpressao, Integer minutosDeImpressao, UUID uuidImpressora, Material material) {
+        // Converter o tempo total de impressão para BigDecimal
+        BigDecimal horasDecimal = BigDecimal.valueOf(horasDeImpressao);
+        BigDecimal minutosDecimal = BigDecimal.valueOf(minutosDeImpressao);
+        BigDecimal horaEmMinuto = new BigDecimal("60");
+
+        var tempoImpressao = horasDecimal.add(minutosDecimal.divide(horaEmMinuto, 4, RoundingMode.HALF_UP));
+
+        // Busca a impressora e potência
+        var impressoraFound = impressoraRepository.findByUuidAndActiveTrueAndDeletedFalse(uuidImpressora).orElseThrow(
+                () -> new ResourceNotFoundException("Impressora: " + uuidImpressora + " não foi encontrada")
+        );
+        var potenciaImpressoraFound = potenciaImpressoraRepository.findByImpressoraUuidAndImpressoraActiveTrueAndImpressoraDeletedFalseAndMaterialUuidAndMaterialActiveTrueAndMaterialDeletedFalse(impressoraFound.getUuid(), material.getUuid()).orElseThrow(
+                () -> new ResourceNotFoundException("Não há potência cadastrada para: " + impressoraFound.getNome() +  " com material: " + material.getNome())
+        );
+
+        // Cálculo da energia gasta durante a impressão
+        BigDecimal divisor = new BigDecimal("1000");
+        var potenciaMediaImpressora = potenciaImpressoraFound.getPotenciaMediaW();
+        var potenciaMediaAms = impressoraFound.getPotenciaMediaAmsW();
+        var potenciaMediaW = potenciaMediaImpressora.add(potenciaMediaAms);
+        var energiaWh = potenciaMediaW.multiply(tempoImpressao);
+        var energiaKwh = energiaWh.divide(divisor, 4, RoundingMode.HALF_UP);
+        var energia = energiaRepository.findFirstByOrderByIdAsc().orElseThrow(
+                () -> new ResourceNotFoundException("Não há fatura de energia cadastrada")
+        );
+        var precokwh = energia.calcularPrecoKwh();
+        var custoEnergia = energiaKwh.multiply(precokwh);
+
+
+        // Cálculo da depreciação
+        var depreciacaoPorHora = impressoraFound.calcularDepreciacaoPorHora();
+        var depreciacao = tempoImpressao.multiply(depreciacaoPorHora);
+
+        return new ResultadoImpressao(tempoImpressao, energiaKwh, custoEnergia, depreciacao);
+    }
+
     private record ResultadoFilamento(
             List<CustoFilamentoDto> custosFilamento,
             BigDecimal custoTotalFilamento,
             Material material
+    ) {
+    }
+
+    private record ResultadoImpressao(
+            BigDecimal tempoImpressao,
+            BigDecimal energiaKwh,
+            BigDecimal custoEnergia,
+            BigDecimal depreciacao
     ) {
     }
 }
