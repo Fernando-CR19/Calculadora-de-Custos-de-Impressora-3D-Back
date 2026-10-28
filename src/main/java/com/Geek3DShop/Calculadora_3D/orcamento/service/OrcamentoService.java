@@ -49,6 +49,8 @@ public class OrcamentoService {
                 resultadoFilamentos.material()
         );
 
+        var custoDesperdicio = this.calcularDesperdicio(orcamentoRequestDto.uuidNivelDesperdicio(), resultadoFilamentos.custoTotalFilamento());
+
 
         return 0;
     }
@@ -107,7 +109,7 @@ public class OrcamentoService {
                 () -> new ResourceNotFoundException("Impressora: " + uuidImpressora + " não foi encontrada")
         );
         var potenciaImpressoraFound = potenciaImpressoraRepository.findByImpressoraUuidAndImpressoraActiveTrueAndImpressoraDeletedFalseAndMaterialUuidAndMaterialActiveTrueAndMaterialDeletedFalse(impressoraFound.getUuid(), material.getUuid()).orElseThrow(
-                () -> new ResourceNotFoundException("Não há potência cadastrada para: " + impressoraFound.getNome() +  " com material: " + material.getNome())
+                () -> new ResourceNotFoundException("Não há potência cadastrada para: " + impressoraFound.getNome() + " com material: " + material.getNome())
         );
 
         // Cálculo da energia gasta durante a impressão
@@ -129,6 +131,17 @@ public class OrcamentoService {
         var depreciacao = tempoImpressao.multiply(depreciacaoPorHora);
 
         return new ResultadoImpressao(tempoImpressao, energiaKwh, custoEnergia, depreciacao);
+    }
+
+    private BigDecimal calcularDesperdicio(UUID uuidNivelDesperdicio, BigDecimal custoTotalFilamento) {
+        BigDecimal divisor = new BigDecimal("100");
+
+        var nivelDesperdicio = nivelDesperdicioRepository.findByUuidAndDeletedFalseAndActiveTrue(uuidNivelDesperdicio).orElseThrow(
+                () -> new ResourceNotFoundException("Nível de desperdício: " + uuidNivelDesperdicio + " não foi encontrado")
+        );
+
+        var partePerdida = custoTotalFilamento.multiply(nivelDesperdicio.getPercentual());
+        return partePerdida.divide(divisor, 4, RoundingMode.HALF_UP);
     }
 
     private record ResultadoFilamento(
