@@ -6,9 +6,9 @@ API REST para precificar peças impressas em 3D, construída para o dia a dia da
 
 O projeto tem três objetivos:
 
-- **Aprendizado:** foi o meu primeiro projeto em Java e Spring Boot, escrito à mão, sem gerar código com IA.
+- **Aprendizado:** foi o meu primeiro projeto em Java e Spring Boot.
 - **Uso real:** é a calculadora que eu uso para precificar as peças que vendo.
-- **Portfólio:** um problema real, com regras de negócio de verdade, em vez de um CRUD genérico.
+- **Portfólio:** um problema real, com regras de negócio de verdade.
 
 ---
 
