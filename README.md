@@ -32,6 +32,7 @@ O projeto tem três objetivos:
 | ORM | Hibernate |
 | Banco de dados | PostgreSQL (Neon) |
 | Migrations | Flyway |
+| Segurança | Spring Security e JWT (java-jwt) |
 | Outros | Lombok, Docker |
 | Deploy | Render (API) e Neon (banco) |
 | Testes | JUnit e Mockito _(em andamento)_ |
@@ -105,8 +106,15 @@ POST /orcamentos
 
 Todos os recursos são identificados por **UUID**. Os ids internos do banco nunca são expostos.
 
+Com exceção do login, **todas as rotas exigem autenticação**. O token devolvido pelo login deve ser enviado no cabeçalho de cada requisição:
+
+```
+Authorization: Bearer <token>
+```
+
 | Recurso | Rotas |
 |---|---|
+| Autenticação | `POST` `/auth/login` _(pública)_ |
 | Materiais | `GET` `POST` `/materiais` · `PATCH` `DELETE` `/materiais/{uuid}` |
 | Filamentos | `GET` `POST` `/filamentos` · `PUT` `DELETE` `/filamentos/{uuid}` |
 | Consumíveis | `GET` `POST` `/consumiveis` · `PUT` `DELETE` `/consumiveis/{uuid}` |
@@ -138,6 +146,7 @@ Todos os erros seguem o mesmo formato:
 | Status | Quando |
 |---|---|
 | 400 | Validação dos campos, JSON mal formatado ou parâmetro inválido na URL |
+| 401 | Token ausente, inválido ou expirado, ou credenciais incorretas no login |
 | 404 | Recurso ou rota não encontrados |
 | 405 | Método HTTP não suportado na rota |
 | 409 | Nome (ou combinação) já cadastrado |
@@ -169,6 +178,12 @@ Todos os erros seguem o mesmo formato:
 
 **Erros centralizados.** Um `@RestControllerAdvice` converte cada tipo de exceção numa resposta HTTP padronizada, inclusive as exceções do próprio Spring.
 
+**Autenticação com JWT, sem sessão.** O login confere a senha (guardada como hash BCrypt) e devolve um token assinado com HMAC-SHA256, com o uuid do usuário, o papel dele e uma validade de duas horas. Um filtro próprio, executado antes dos controllers, valida o token em cada requisição e confere se o usuário continua ativo, para que um usuário bloqueado perca o acesso na hora, mesmo com um token dentro da validade.
+- Usuário inexistente e senha errada recebem **a mesma** resposta, para não revelar quais usernames existem.
+- Os usernames são únicos sem diferenciar maiúsculas, e os de contas apagadas continuam reservados.
+- O primeiro administrador é criado na inicialização da aplicação, a partir de variáveis de ambiente, sem credenciais no código ou nas migrations.
+- As respostas 401 seguem o mesmo formato dos outros erros, mesmo sendo geradas pelo Spring Security, antes de a requisição chegar aos controllers.
+
 ---
 
 ## Como rodar localmente
@@ -182,13 +197,20 @@ Todos os erros seguem o mesmo formato:
    cd <pasta-do-projeto>
    ```
 
-2. Crie um arquivo `.env` na raiz com a URL JDBC do banco:
+2. Crie um arquivo `.env` na raiz com a URL JDBC do banco e a chave de assinatura dos tokens:
 
    ```
    DATABASE_URL=jdbc:postgresql://<host>/<banco>?user=<usuario>&password=<senha>&sslmode=require
+   JWT_SECRET=<chave-aleatoria>
    ```
 
-   O arquivo é lido automaticamente pela aplicação e está no `.gitignore`.
+   A chave precisa ter pelo menos 256 bits. Uma forma de gerar:
+
+   ```bash
+   openssl rand -base64 32
+   ```
+
+   O arquivo é lido automaticamente pela aplicação e está no `.gitignore`. Sem a `JWT_SECRET`, a aplicação não sobe.
 
 3. Rode a aplicação:
 
@@ -202,7 +224,7 @@ Todos os erros seguem o mesmo formato:
 
 ```bash
 docker build -t calculadora-3d .
-docker run -p 8080:8080 -e DATABASE_URL="<url-jdbc>" calculadora-3d
+docker run -p 8080:8080 -e DATABASE_URL="<url-jdbc>" -e JWT_SECRET="<chave>" calculadora-3d
 ```
 
 ---
@@ -212,6 +234,7 @@ docker run -p 8080:8080 -e DATABASE_URL="<url-jdbc>" calculadora-3d
 **Técnicos**
 - [ ] Testes automatizados (JUnit e Mockito), começando pelo cálculo do orçamento
 - [ ] Front-end em Angular
+- [ ] Limite de tentativas de login, contra ataques de força bruta
 
 **Regras de negócio**
 - [ ] Custo de manutenção por hora da impressora (bicos, placa, peças de desgaste)
@@ -228,4 +251,4 @@ docker run -p 8080:8080 -e DATABASE_URL="<url-jdbc>" calculadora-3d
 
 **Fernando** — Desenvolvedor Full Stack
 
-[LinkedIn](https://calculadora-de-custos-de-impress-o-3d.onrender.com) · [GitHub](https://github.com/Fernando-CR19)
+[LinkedIn](https://www.linkedin.com/in/fernando-chaves-rodrigues-/) · [GitHub](https://github.com/Fernando-CR19)
