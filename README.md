@@ -226,11 +226,3 @@ Todos os erros seguem o mesmo formato:
 docker build -t calculadora-3d .
 docker run -p 8080:8080 -e DATABASE_URL="<url-jdbc>" -e JWT_SECRET="<chave>" calculadora-3d
 ```
-
----
-
-## Autor
-
-**Fernando** — Desenvolvedor Full Stack
-
-[LinkedIn](https://www.linkedin.com/in/fernando-chaves-rodrigues-/) · [GitHub](https://github.com/Fernando-CR19)
