@@ -229,24 +229,6 @@ docker run -p 8080:8080 -e DATABASE_URL="<url-jdbc>" -e JWT_SECRET="<chave>" cal
 
 ---
 
-## Próximos passos
-
-**Técnicos**
-- [ ] Testes automatizados (JUnit e Mockito), começando pelo cálculo do orçamento
-- [ ] Front-end em Angular
-- [ ] Limite de tentativas de login, contra ataques de força bruta
-
-**Regras de negócio**
-- [ ] Custo de manutenção por hora da impressora (bicos, placa, peças de desgaste)
-- [ ] Tempo fixo de preparação por impressão (fatiar, limpar mesa, remover suportes)
-- [ ] Separar a purga (em gramas, informada pelo fatiador) da taxa de falha (percentual sobre o custo inteiro)
-- [ ] Preço de mercado opcional no orçamento, mostrando o lucro e a margem reais
-- [ ] Peças com mais de um material no mesmo orçamento
-- [ ] Catálogo de impressoras com as potências do fabricante já preenchidas
-- [ ] Vários usuários, com cadastros independentes
-
----
-
 ## Autor
 
 **Fernando** — Desenvolvedor Full Stack
