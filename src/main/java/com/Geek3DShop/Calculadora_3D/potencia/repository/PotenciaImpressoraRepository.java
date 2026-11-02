@@ -17,4 +17,6 @@ public interface PotenciaImpressoraRepository extends JpaRepository<PotenciaImpr
 
     Optional<PotenciaImpressora> findByImpressoraUuidAndImpressoraActiveTrueAndImpressoraDeletedFalseAndMaterialUuidAndMaterialActiveTrueAndMaterialDeletedFalse (UUID uuidImpressora, UUID uuidMaterial);
 
+    Optional<PotenciaImpressora> findByImpressoraIdAndMaterialUuidAndMaterialActiveTrueAndMaterialDeletedFalse(Integer impressoraId, UUID uuidMaterial);
+
 }

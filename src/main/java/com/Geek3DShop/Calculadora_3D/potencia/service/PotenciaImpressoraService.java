@@ -11,11 +11,11 @@ import com.Geek3DShop.Calculadora_3D.potencia.entity.PotenciaImpressora;
 import com.Geek3DShop.Calculadora_3D.potencia.repository.PotenciaImpressoraRepository;
 import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceAlreadyExistsException;
 import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceNotFoundException;
+import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -31,12 +31,12 @@ public class PotenciaImpressoraService {
     }
 
     @Transactional
-    public PotenciaImpressoraResponseDto createPotenciaImpressora(UUID uuidImpressora, CreatePotenciaImpressoraRequestDto createPotenciaImpressoraRequestDto) {
-        Impressora impressora = impressoraRepository.findByUuidAndActiveTrueAndDeletedFalse(uuidImpressora).orElseThrow(
+    public PotenciaImpressoraResponseDto createPotenciaImpressora(Usuario usuario, UUID uuidImpressora, CreatePotenciaImpressoraRequestDto createPotenciaImpressoraRequestDto) {
+        Impressora impressora = impressoraRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidImpressora).orElseThrow(
                 () -> new ResourceNotFoundException("Impressora: " + uuidImpressora + " não foi encontrada")
         );
 
-        Material material = materialRepository.findByUuidAndActiveTrueAndDeletedFalse(createPotenciaImpressoraRequestDto.uuidMaterial()).orElseThrow(
+        Material material = materialRepository.findByUuidAndUsuarioAndActiveTrueAndDeletedFalse(createPotenciaImpressoraRequestDto.uuidMaterial(), usuario).orElseThrow(
                 () -> new ResourceNotFoundException("Material: " + createPotenciaImpressoraRequestDto.uuidMaterial() + " não foi encontrado")
         );
 
@@ -50,8 +50,8 @@ public class PotenciaImpressoraService {
     }
 
     @Transactional(readOnly = true)
-    public List<PotenciaImpressoraResponseDto> listPotenciasImpressora(UUID uuidImpressora) {
-        Impressora impressora = impressoraRepository.findByUuidAndActiveTrueAndDeletedFalse(uuidImpressora).orElseThrow(
+    public List<PotenciaImpressoraResponseDto> listPotenciasImpressora(Usuario usuario, UUID uuidImpressora) {
+        Impressora impressora = impressoraRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidImpressora).orElseThrow(
                 () -> new ResourceNotFoundException("Impressora: " + uuidImpressora + " não foi encontrada")
         );
 
@@ -60,8 +60,12 @@ public class PotenciaImpressoraService {
     }
 
     @Transactional
-    public PotenciaImpressoraResponseDto updatePotenciaImpressora(UUID uuidImpressora, UUID uuidMaterial, UpdatePotenciaImpressoraDto updatePotenciaImpressoraDto) {
-        PotenciaImpressora potenciaImpressora = potenciaImpressoraRepository.findByImpressoraUuidAndImpressoraActiveTrueAndImpressoraDeletedFalseAndMaterialUuidAndMaterialActiveTrueAndMaterialDeletedFalse(uuidImpressora, uuidMaterial).orElseThrow(
+    public PotenciaImpressoraResponseDto updatePotenciaImpressora(Usuario usuario, UUID uuidImpressora, UUID uuidMaterial, UpdatePotenciaImpressoraDto updatePotenciaImpressoraDto) {
+        Impressora impressora = impressoraRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidImpressora).orElseThrow(
+                () -> new ResourceNotFoundException("Impressora: " + uuidImpressora + " não foi encontrada")
+        );
+
+        PotenciaImpressora potenciaImpressora = potenciaImpressoraRepository.findByImpressoraIdAndMaterialUuidAndMaterialActiveTrueAndMaterialDeletedFalse(impressora.getId(), uuidMaterial).orElseThrow(
                 () -> new ResourceNotFoundException("Potência da impressora não foi encontrada")
         );
 
@@ -73,8 +77,12 @@ public class PotenciaImpressoraService {
     }
 
     @Transactional
-    public void deletePotenciaImpressora(UUID uuidImpressora, UUID uuidMaterial) {
-        PotenciaImpressora potenciaImpressora = potenciaImpressoraRepository.findByImpressoraUuidAndImpressoraActiveTrueAndImpressoraDeletedFalseAndMaterialUuidAndMaterialActiveTrueAndMaterialDeletedFalse(uuidImpressora, uuidMaterial).orElseThrow(
+    public void deletePotenciaImpressora(Usuario usuario, UUID uuidImpressora, UUID uuidMaterial) {
+        Impressora impressora = impressoraRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidImpressora).orElseThrow(
+                () -> new ResourceNotFoundException("Impressora: " + uuidImpressora + " não foi encontrada")
+        );
+
+        PotenciaImpressora potenciaImpressora = potenciaImpressoraRepository.findByImpressoraIdAndMaterialUuidAndMaterialActiveTrueAndMaterialDeletedFalse(impressora.getId(), uuidMaterial).orElseThrow(
                 () -> new ResourceNotFoundException("Potência da impressora não foi encontrada")
         );
 
