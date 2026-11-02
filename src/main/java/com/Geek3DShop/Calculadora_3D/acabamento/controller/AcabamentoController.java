@@ -3,7 +3,9 @@ package com.Geek3DShop.Calculadora_3D.acabamento.controller;
 import com.Geek3DShop.Calculadora_3D.acabamento.dto.AcabamentoRequestDto;
 import com.Geek3DShop.Calculadora_3D.acabamento.dto.AcabamentoResponseDto;
 import com.Geek3DShop.Calculadora_3D.acabamento.service.AcabamentoService;
+import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
 import jakarta.validation.Valid;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,12 +18,12 @@ public class AcabamentoController {
     }
 
     @PutMapping
-    public AcabamentoResponseDto upsertAcabamento(@Valid @RequestBody AcabamentoRequestDto acabamentoRequestDto) {
-        return acabamentoService.upsertAcabamento(acabamentoRequestDto);
+    public AcabamentoResponseDto upsertAcabamento(@AuthenticationPrincipal Usuario usuario, @Valid @RequestBody AcabamentoRequestDto acabamentoRequestDto) {
+        return acabamentoService.upsertAcabamento(usuario, acabamentoRequestDto);
     }
 
     @GetMapping
-    public AcabamentoResponseDto getAcabamento() {
-        return acabamentoService.getAcabamento();
+    public AcabamentoResponseDto getAcabamento(@AuthenticationPrincipal Usuario usuario) {
+        return acabamentoService.getAcabamento(usuario);
     }
 }

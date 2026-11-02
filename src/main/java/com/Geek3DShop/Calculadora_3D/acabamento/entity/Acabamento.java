@@ -1,9 +1,7 @@
 package com.Geek3DShop.Calculadora_3D.acabamento.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,9 +24,14 @@ public class Acabamento {
     @UpdateTimestamp
     private OffsetDateTime updatedAt;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+
     private BigDecimal valorHora;
 
-    public Acabamento(BigDecimal valorHora) {
+    public Acabamento(Usuario usuario, BigDecimal valorHora) {
+        this.usuario = usuario;
         this.valorHora = valorHora;
     }
 

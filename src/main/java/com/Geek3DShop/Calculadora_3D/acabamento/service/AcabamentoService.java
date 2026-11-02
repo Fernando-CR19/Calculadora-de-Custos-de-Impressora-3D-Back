@@ -5,6 +5,7 @@ import com.Geek3DShop.Calculadora_3D.acabamento.dto.AcabamentoResponseDto;
 import com.Geek3DShop.Calculadora_3D.acabamento.entity.Acabamento;
 import com.Geek3DShop.Calculadora_3D.acabamento.repository.AcabamentoRepository;
 import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceNotFoundException;
+import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,8 +18,8 @@ public class AcabamentoService {
     }
 
     @Transactional
-    public AcabamentoResponseDto upsertAcabamento(AcabamentoRequestDto acabamentoRequestDto) {
-        var acabamento = acabamentoRepository.findFirstByOrderByIdAsc();
+    public AcabamentoResponseDto upsertAcabamento(Usuario usuario, AcabamentoRequestDto acabamentoRequestDto) {
+        var acabamento = acabamentoRepository.findByUsuario(usuario);
 
         if (acabamento.isPresent()) {
             Acabamento acabamentoFound = acabamento.get();
@@ -30,15 +31,15 @@ public class AcabamentoService {
             return AcabamentoResponseDto.from(acabamentoFound);
         }
 
-        var entity = new Acabamento(acabamentoRequestDto.valorHora());
+        var entity = new Acabamento(usuario, acabamentoRequestDto.valorHora());
         var entitySaved = acabamentoRepository.save(entity);
 
         return AcabamentoResponseDto.from(entitySaved);
     }
 
     @Transactional(readOnly = true)
-    public AcabamentoResponseDto getAcabamento() {
-        var acabamento = acabamentoRepository.findFirstByOrderByIdAsc().orElseThrow(
+    public AcabamentoResponseDto getAcabamento(Usuario usuario) {
+        var acabamento = acabamentoRepository.findByUsuario(usuario).orElseThrow(
                 () -> new ResourceNotFoundException("O valor da hora trabalhada no acabamento não foi cadastrado")
         );
 
