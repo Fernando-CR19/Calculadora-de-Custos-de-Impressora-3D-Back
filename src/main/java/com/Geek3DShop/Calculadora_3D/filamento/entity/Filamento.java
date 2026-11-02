@@ -1,6 +1,7 @@
 package com.Geek3DShop.Calculadora_3D.filamento.entity;
 
 import com.Geek3DShop.Calculadora_3D.material.entity.Material;
+import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,6 +39,10 @@ public class Filamento {
 
     private boolean deleted = false;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+
     private String cor;
 
     private BigDecimal precoKg;
@@ -46,7 +51,8 @@ public class Filamento {
     @JoinColumn(name = "material_id", nullable = false)
     private Material material;
 
-    public Filamento(String cor, BigDecimal precoKg, Material material) {
+    public Filamento(Usuario usuario, String cor, BigDecimal precoKg, Material material) {
+        this.usuario = usuario;
         this.cor = cor;
         this.precoKg = precoKg;
         this.material = material;

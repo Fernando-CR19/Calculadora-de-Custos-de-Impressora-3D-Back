@@ -10,6 +10,7 @@ import com.Geek3DShop.Calculadora_3D.material.repository.MaterialRepository;
 import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceAlreadyExistsException;
 import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceNotFoundException;
 
+import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,8 +29,8 @@ public class FilamentoService {
     }
 
     @Transactional
-    public FilamentoResponseDto createFilamento(CreateFilamentoRequestDto filamentoDto) {
-        Material material = materialRepository.findByUuidAndActiveTrueAndDeletedFalse(filamentoDto.uuidMaterial()).orElseThrow(
+    public FilamentoResponseDto createFilamento(Usuario usuario, CreateFilamentoRequestDto filamentoDto) {
+        Material material = materialRepository.findByUuidAndUsuarioAndActiveTrueAndDeletedFalse(filamentoDto.uuidMaterial(), usuario).orElseThrow(
                 () -> new ResourceNotFoundException("Material: " + filamentoDto.uuidMaterial() + " não encontrado")
         );
 
@@ -52,24 +53,24 @@ public class FilamentoService {
             throw new ResourceAlreadyExistsException("Filamento: " + material.getNome() + " cor: " + filamentoDto.cor() + " já existe");
         }
 
-        var entity = new Filamento(filamentoDto.cor(), filamentoDto.precoKg(), material);
+        var entity = new Filamento(usuario, filamentoDto.cor(), filamentoDto.precoKg(), material);
         filamentoRepository.save(entity);
         return FilamentoResponseDto.from(entity);
     }
 
     @Transactional(readOnly = true)
-    public List<FilamentoResponseDto> listFilamentos() {
-        var list = filamentoRepository.findByActiveTrueAndDeletedFalseOrderByMaterialNomeAscCorAsc();
+    public List<FilamentoResponseDto> listFilamentos(Usuario usuario) {
+        var list = filamentoRepository.findByUsuarioAndActiveTrueAndDeletedFalseOrderByMaterialNomeAscCorAsc(usuario);
         return list.stream().map(FilamentoResponseDto::from).toList();
     }
 
     @Transactional
-    public FilamentoResponseDto updateFilamento(UUID uuid, UpdateFilamentoDto filamentoDto) {
-        Filamento filamento = filamentoRepository.findByUuidAndActiveTrueAndDeletedFalse(uuid).orElseThrow(
+    public FilamentoResponseDto updateFilamento(Usuario usuario, UUID uuid, UpdateFilamentoDto filamentoDto) {
+        Filamento filamento = filamentoRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuid).orElseThrow(
                 () -> new ResourceNotFoundException("Filamento: " + uuid + " não encontrado")
         );
 
-        Material material = materialRepository.findByUuidAndActiveTrueAndDeletedFalse(filamentoDto.uuidMaterial()).orElseThrow(
+        Material material = materialRepository.findByUuidAndUsuarioAndActiveTrueAndDeletedFalse(filamentoDto.uuidMaterial(), usuario).orElseThrow(
                 () -> new ResourceNotFoundException("Material: " + filamentoDto.uuidMaterial() + " não encontrado")
         );
 
@@ -87,8 +88,8 @@ public class FilamentoService {
     }
 
     @Transactional
-    public void deleteFilamento(UUID uuid) {
-        Filamento filamento = filamentoRepository.findByUuidAndActiveTrueAndDeletedFalse(uuid).orElseThrow(
+    public void deleteFilamento(Usuario usuario, UUID uuid) {
+        Filamento filamento = filamentoRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuid).orElseThrow(
                 () -> new ResourceNotFoundException("Filamento: " + uuid + " não encontrado")
         );
 

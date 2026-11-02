@@ -1,6 +1,7 @@
 package com.Geek3DShop.Calculadora_3D.filamento.repository;
 
 import com.Geek3DShop.Calculadora_3D.filamento.entity.Filamento;
+import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -15,9 +16,11 @@ public interface FilamentoRepository extends JpaRepository<Filamento, Integer> {
 
     Optional<Filamento> findByMaterialIdAndCorIgnoreCase(Integer id, String cor);
 
-    List<Filamento> findByActiveTrueAndDeletedFalseOrderByMaterialNomeAscCorAsc();
+    List<Filamento> findByUsuarioAndActiveTrueAndDeletedFalseOrderByMaterialNomeAscCorAsc(Usuario usuario);
 
     Optional<Filamento> findByUuidAndActiveTrueAndDeletedFalse(UUID uuid);
+
+    Optional<Filamento> findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(Usuario usuario, UUID uuid);
 
     Optional<Filamento> findByCorIgnoreCaseAndMaterialUuidAndUuidNot(String cor, UUID materialUuid, UUID uuid);
 

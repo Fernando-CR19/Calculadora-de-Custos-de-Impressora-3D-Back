@@ -4,8 +4,10 @@ import com.Geek3DShop.Calculadora_3D.filamento.dto.CreateFilamentoRequestDto;
 import com.Geek3DShop.Calculadora_3D.filamento.dto.FilamentoResponseDto;
 import com.Geek3DShop.Calculadora_3D.filamento.dto.UpdateFilamentoDto;
 import com.Geek3DShop.Calculadora_3D.filamento.service.FilamentoService;
+import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,23 +24,23 @@ public class FilamentoController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public FilamentoResponseDto createFilamento(@Valid @RequestBody CreateFilamentoRequestDto filamentoRequestDto) {
-        return filamentoService.createFilamento(filamentoRequestDto);
+    public FilamentoResponseDto createFilamento(@AuthenticationPrincipal Usuario usuario, @Valid @RequestBody CreateFilamentoRequestDto filamentoRequestDto) {
+        return filamentoService.createFilamento(usuario, filamentoRequestDto);
     }
 
     @GetMapping
-    public List<FilamentoResponseDto> listFilamentos() {
-        return filamentoService.listFilamentos();
+    public List<FilamentoResponseDto> listFilamentos(@AuthenticationPrincipal Usuario usuario) {
+        return filamentoService.listFilamentos(usuario);
     }
 
     @PutMapping("/{uuid}")
-    public FilamentoResponseDto updateFilamento(@PathVariable UUID uuid, @Valid @RequestBody UpdateFilamentoDto filamentoDto) {
-        return filamentoService.updateFilamento(uuid, filamentoDto);
+    public FilamentoResponseDto updateFilamento(@AuthenticationPrincipal Usuario usuario,@PathVariable UUID uuid, @Valid @RequestBody UpdateFilamentoDto filamentoDto) {
+        return filamentoService.updateFilamento(usuario, uuid, filamentoDto);
     }
 
     @DeleteMapping("/{uuid}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteFilamento(@PathVariable UUID uuid) {
-        filamentoService.deleteFilamento(uuid);
+    public void deleteFilamento(@AuthenticationPrincipal Usuario usuario, @PathVariable UUID uuid) {
+        filamentoService.deleteFilamento(usuario, uuid);
     }
 }
