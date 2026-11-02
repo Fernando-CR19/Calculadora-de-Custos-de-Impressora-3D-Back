@@ -1,5 +1,6 @@
 package com.Geek3DShop.Calculadora_3D.impressora.entity;
 
+import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,6 +40,10 @@ public class Impressora {
 
     private boolean deleted = false;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+
     private String nome;
 
     private BigDecimal custoAquisicao;
@@ -49,7 +54,8 @@ public class Impressora {
     private BigDecimal potenciaMediaAmsW;
 
     @Builder
-    public Impressora(String nome, BigDecimal custoAquisicao, Integer vidaUtilHoras, BigDecimal potenciaMediaAmsW) {
+    public Impressora(Usuario usuario, String nome, BigDecimal custoAquisicao, Integer vidaUtilHoras, BigDecimal potenciaMediaAmsW) {
+        this.usuario = usuario;
         this.nome = nome;
         this.custoAquisicao = custoAquisicao;
         this.vidaUtilHoras = vidaUtilHoras;

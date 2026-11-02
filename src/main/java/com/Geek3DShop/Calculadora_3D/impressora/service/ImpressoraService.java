@@ -7,6 +7,7 @@ import com.Geek3DShop.Calculadora_3D.impressora.entity.Impressora;
 import com.Geek3DShop.Calculadora_3D.impressora.repository.ImpressoraRepository;
 import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceAlreadyExistsException;
 import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceNotFoundException;
+import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,8 +24,8 @@ public class ImpressoraService {
     }
 
     @Transactional
-    public ImpressoraResponseDto createImpressora(CreateImpressoraRequestDto impressoraRequestDto) {
-        Optional<Impressora> impressora = impressoraRepository.findByNomeIgnoreCase(impressoraRequestDto.nome());
+    public ImpressoraResponseDto createImpressora(Usuario usuario, CreateImpressoraRequestDto impressoraRequestDto) {
+        Optional<Impressora> impressora = impressoraRepository.findByUsuarioAndNomeIgnoreCase(usuario, impressoraRequestDto.nome());
 
         if (impressora.isPresent()) {
             Impressora impressoraFound = impressora.get();
@@ -46,6 +47,7 @@ public class ImpressoraService {
         }
 
         var entity = Impressora.builder()
+                .usuario(usuario)
                 .nome(impressoraRequestDto.nome())
                 .custoAquisicao(impressoraRequestDto.custoAquisicao())
                 .vidaUtilHoras(impressoraRequestDto.vidaUtilHoras())
@@ -58,18 +60,18 @@ public class ImpressoraService {
     }
 
     @Transactional(readOnly = true)
-    public List<ImpressoraResponseDto> listImpressoras() {
-        var list = impressoraRepository.findByActiveTrueAndDeletedFalseOrderByNomeAsc();
+    public List<ImpressoraResponseDto> listImpressoras(Usuario usuario) {
+        var list = impressoraRepository.findByUsuarioAndActiveTrueAndDeletedFalseOrderByNomeAsc(usuario);
         return list.stream().map(ImpressoraResponseDto::from).toList();
     }
 
     @Transactional
-    public ImpressoraResponseDto updateImpressora(UUID uuid, UpdateImpressoraDto updateImpressoraDto) {
-        Impressora impressora = impressoraRepository.findByUuidAndActiveTrueAndDeletedFalse(uuid).orElseThrow(
+    public ImpressoraResponseDto updateImpressora(Usuario usuario, UUID uuid, UpdateImpressoraDto updateImpressoraDto) {
+        Impressora impressora = impressoraRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuid).orElseThrow(
                 () -> new ResourceNotFoundException("Impressora: " + uuid + " não foi encontrada")
         );
 
-        impressoraRepository.findByNomeIgnoreCaseAndUuidNot(updateImpressoraDto.nome(), uuid).ifPresent(_ -> {
+        impressoraRepository.findByUsuarioAndNomeIgnoreCaseAndUuidNot(usuario, updateImpressoraDto.nome(), uuid).ifPresent(_ -> {
             throw new ResourceAlreadyExistsException("Impressora: " + updateImpressoraDto.nome() + " já está cadastrada");
         });
 
@@ -84,8 +86,8 @@ public class ImpressoraService {
     }
 
     @Transactional
-    public void deleteImpressora(UUID uuid) {
-        Impressora impressora = impressoraRepository.findByUuidAndActiveTrueAndDeletedFalse(uuid).orElseThrow(
+    public void deleteImpressora(Usuario usuario, UUID uuid) {
+        Impressora impressora = impressoraRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuid).orElseThrow(
             () -> new ResourceNotFoundException("Impressora: " + uuid + " não foi encontrada")
         );
 
