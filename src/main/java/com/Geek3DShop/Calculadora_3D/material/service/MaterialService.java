@@ -9,6 +9,7 @@ import com.Geek3DShop.Calculadora_3D.material.repository.MaterialRepository;
 import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceAlreadyExistsException;
 import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceNotFoundException;
 
+import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,8 +29,8 @@ public class MaterialService {
     }
 
     @Transactional
-    public MaterialResponseDto createMaterial(CreateMaterialRequestDto materialDto) {
-        Optional<Material> material = materialRepository.findByNomeIgnoreCase(materialDto.nome());
+    public MaterialResponseDto createMaterial(Usuario usuario, CreateMaterialRequestDto materialDto) {
+        Optional<Material> material = materialRepository.findByUsuarioAndNomeIgnoreCase(usuario, materialDto.nome());
 
         if (material.isPresent()) {
             Material materialFound = material.get();
@@ -47,24 +48,24 @@ public class MaterialService {
             throw new ResourceAlreadyExistsException("Material: " + materialDto.nome() + " já está cadastrado");
         }
 
-        var entity = new Material(materialDto.nome());
+        var entity = new Material(usuario, materialDto.nome());
         var entitySaved = materialRepository.save(entity);
         return MaterialResponseDto.from(entitySaved);
     }
 
     @Transactional(readOnly = true)
-    public List<MaterialResponseDto> listMaterials() {
-        var list = materialRepository.findByActiveTrueAndDeletedFalseOrderByNomeAsc();
+    public List<MaterialResponseDto> listMaterials(Usuario usuario) {
+        var list = materialRepository.findByUsuarioAndActiveTrueAndDeletedFalseOrderByNomeAsc(usuario);
         return list.stream().map(MaterialResponseDto::from).toList();
     }
 
     @Transactional
-    public MaterialResponseDto updateMaterial(UUID uuid, UpdateMaterialDto materialDto) {
-        Material material = materialRepository.findByUuidAndActiveTrueAndDeletedFalse(uuid).orElseThrow(
+    public MaterialResponseDto updateMaterial(Usuario usuario, UUID uuid, UpdateMaterialDto materialDto) {
+        Material material = materialRepository.findByUuidAndUsuarioAndActiveTrueAndDeletedFalse(uuid, usuario).orElseThrow(
                 () -> new ResourceNotFoundException("Material: " + uuid + " não encontrado")
         );
 
-        materialRepository.findByNomeIgnoreCaseAndUuidNot(materialDto.nome(), uuid).ifPresent(_ -> {
+        materialRepository.findByNomeIgnoreCaseAndUsuarioAndUuidNot(materialDto.nome(), usuario, uuid).ifPresent(_ -> {
             throw new ResourceAlreadyExistsException("Material: " + materialDto.nome() + " já está cadastrado");
         });
 
@@ -76,8 +77,8 @@ public class MaterialService {
     }
 
     @Transactional
-    public void deleteMaterial(UUID uuid) {
-        Material material = materialRepository.findByUuidAndActiveTrueAndDeletedFalse(uuid).orElseThrow(
+    public void deleteMaterial(Usuario usuario, UUID uuid) {
+        Material material = materialRepository.findByUuidAndUsuarioAndActiveTrueAndDeletedFalse(uuid, usuario).orElseThrow(
                 () -> new ResourceNotFoundException("Material: " + uuid + " não encontrado")
         );
 

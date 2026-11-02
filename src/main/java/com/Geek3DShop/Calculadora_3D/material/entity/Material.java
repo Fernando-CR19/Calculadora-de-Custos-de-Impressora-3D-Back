@@ -1,5 +1,6 @@
 package com.Geek3DShop.Calculadora_3D.material.entity;
 
+import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,9 +37,14 @@ public class Material {
 
     private boolean deleted = false;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+
     private String nome;
 
-    public Material(String nome) {
+    public Material(Usuario usuario, String nome) {
+        this.usuario = usuario;
         this.nome = nome;
     }
 }
