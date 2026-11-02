@@ -7,6 +7,7 @@ import com.Geek3DShop.Calculadora_3D.consumivel.entity.Consumivel;
 import com.Geek3DShop.Calculadora_3D.consumivel.repository.ConsumivelRepository;
 import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceAlreadyExistsException;
 import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceNotFoundException;
+import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,8 +24,8 @@ public class ConsumivelService {
     }
 
     @Transactional
-    public ConsumivelResponseDto createConsumivel(CreateConsumivelRequestDto consumivelDto) {
-        Optional<Consumivel> consumivel = consumivelRepository.findByNomeIgnoreCase(consumivelDto.nome());
+    public ConsumivelResponseDto createConsumivel(Usuario usuario, CreateConsumivelRequestDto consumivelDto) {
+        Optional<Consumivel> consumivel = consumivelRepository.findByUsuarioAndNomeIgnoreCase(usuario, consumivelDto.nome());
 
         if (consumivel.isPresent()) {
             Consumivel consumivelFound = consumivel.get();
@@ -44,25 +45,25 @@ public class ConsumivelService {
             throw new ResourceAlreadyExistsException("Consumível: " + consumivelDto.nome() + " já está cadastrado");
         }
 
-        var entity = new Consumivel(consumivelDto.nome(), consumivelDto.precoKit(), consumivelDto.quantidadeKit());
+        var entity = new Consumivel(usuario, consumivelDto.nome(), consumivelDto.precoKit(), consumivelDto.quantidadeKit());
         var entitySaved = consumivelRepository.save(entity);
 
         return ConsumivelResponseDto.from(entitySaved);
     }
 
     @Transactional(readOnly = true)
-    public List<ConsumivelResponseDto> listConsumiveis() {
-        var list = consumivelRepository.findByActiveTrueAndDeletedFalseOrderByNomeAsc();
+    public List<ConsumivelResponseDto> listConsumiveis(Usuario usuario) {
+        var list = consumivelRepository.findByUsuarioAndActiveTrueAndDeletedFalseOrderByNomeAsc(usuario);
         return list.stream().map(ConsumivelResponseDto::from).toList();
     }
 
     @Transactional
-    public ConsumivelResponseDto updateConsumivel(UUID uuid, UpdateConsumivelDto consumivelDto) {
-        Consumivel consumivel = consumivelRepository.findByUuidAndActiveTrueAndDeletedFalse(uuid).orElseThrow(
+    public ConsumivelResponseDto updateConsumivel(Usuario usuario, UUID uuid, UpdateConsumivelDto consumivelDto) {
+        Consumivel consumivel = consumivelRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuid).orElseThrow(
                 () -> new ResourceNotFoundException("Consumível: " + uuid + " não foi encontrado")
         );
 
-        consumivelRepository.findByNomeIgnoreCaseAndUuidNot(consumivelDto.nome(), uuid).ifPresent(_ -> {
+        consumivelRepository.findByUsuarioAndNomeIgnoreCaseAndUuidNot(usuario, consumivelDto.nome(), uuid).ifPresent(_ -> {
             throw new ResourceAlreadyExistsException("Consumível: " + consumivelDto.nome() + " já está cadastrado");
         });
 
@@ -76,8 +77,8 @@ public class ConsumivelService {
     }
 
     @Transactional
-    public void deleteConsumivel(UUID uuid) {
-        Consumivel consumivel = consumivelRepository.findByUuidAndActiveTrueAndDeletedFalse(uuid).orElseThrow(
+    public void deleteConsumivel(Usuario usuario, UUID uuid) {
+        Consumivel consumivel = consumivelRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuid).orElseThrow(
             () -> new ResourceNotFoundException("Consumível: "+ uuid + " não foi encontrado")
         );
 

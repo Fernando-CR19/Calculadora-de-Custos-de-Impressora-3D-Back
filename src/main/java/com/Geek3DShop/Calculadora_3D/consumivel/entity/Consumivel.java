@@ -1,5 +1,6 @@
 package com.Geek3DShop.Calculadora_3D.consumivel.entity;
 
+import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,13 +39,18 @@ public class Consumivel {
 
     private boolean deleted = false;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+
     private String nome;
 
     private BigDecimal precoKit;
 
     private Integer quantidadeKit;
 
-    public Consumivel(String nome, BigDecimal precoKit, Integer quantidadeKit) {
+    public Consumivel(Usuario usuario, String nome, BigDecimal precoKit, Integer quantidadeKit) {
+        this.usuario = usuario;
         this.nome = nome;
         this.precoKit = precoKit;
         this.quantidadeKit = quantidadeKit;
