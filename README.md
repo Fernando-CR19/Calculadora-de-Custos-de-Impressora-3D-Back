@@ -19,7 +19,6 @@ O projeto tem três objetivos:
 - [Endpoints](#endpoints)
 - [Decisões técnicas](#decisões-técnicas)
 - [Como rodar localmente](#como-rodar-localmente)
-- [Próximos passos](#próximos-passos)
 
 ---
 
@@ -106,15 +105,17 @@ POST /orcamentos
 
 Todos os recursos são identificados por **UUID**. Os ids internos do banco nunca são expostos.
 
-Com exceção do login, **todas as rotas exigem autenticação**. O token devolvido pelo login deve ser enviado no cabeçalho de cada requisição:
+Com exceção do login e do cadastro, **todas as rotas exigem autenticação**. O token devolvido pelo login deve ser enviado no cabeçalho de cada requisição:
 
 ```
 Authorization: Bearer <token>
 ```
 
+Cada usuário vê e altera **apenas os próprios dados**: materiais, impressoras, preços e configurações de um usuário são invisíveis para os outros.
+
 | Recurso | Rotas |
 |---|---|
-| Autenticação | `POST` `/auth/login` _(pública)_ |
+| Autenticação | `POST` `/auth/cadastro` · `POST` `/auth/login` _(públicas)_ |
 | Materiais | `GET` `POST` `/materiais` · `PUT` `DELETE` `/materiais/{uuid}` |
 | Filamentos | `GET` `POST` `/filamentos` · `PUT` `DELETE` `/filamentos/{uuid}` |
 | Consumíveis | `GET` `POST` `/consumiveis` · `PUT` `DELETE` `/consumiveis/{uuid}` |
@@ -147,9 +148,9 @@ Todos os erros seguem o mesmo formato:
 |---|---|
 | 400 | Validação dos campos, JSON mal formatado ou parâmetro inválido na URL |
 | 401 | Token ausente, inválido ou expirado, ou credenciais incorretas no login |
-| 404 | Recurso ou rota não encontrados |
+| 404 | Recurso ou rota não encontrados, inclusive registros que pertencem a outro usuário |
 | 405 | Método HTTP não suportado na rota |
-| 409 | Nome (ou combinação) já cadastrado |
+| 409 | Nome (ou combinação) já cadastrado, ou nome de usuário já em uso |
 | 422 | Regra de negócio violada (por exemplo, filamentos de materiais diferentes no mesmo orçamento) |
 | 500 | Erro inesperado, registrado em log, sem expor detalhes internos |
 
@@ -180,9 +181,17 @@ Todos os erros seguem o mesmo formato:
 
 **Autenticação com JWT, sem sessão.** O login confere a senha (guardada como hash BCrypt) e devolve um token assinado com HMAC-SHA256, com o uuid do usuário, o papel dele e uma validade de duas horas. Um filtro próprio, executado antes dos controllers, valida o token em cada requisição e confere se o usuário continua ativo, para que um usuário bloqueado perca o acesso na hora, mesmo com um token dentro da validade.
 - Usuário inexistente e senha errada recebem **a mesma** resposta, para não revelar quais usernames existem.
+- O cadastro é público e sempre cria um usuário comum: o papel nunca vem da requisição. O formato do username é validado (letras, números, ponto, hífen e underline).
 - Os usernames são únicos sem diferenciar maiúsculas, e os de contas apagadas continuam reservados.
 - O primeiro administrador é criado na inicialização da aplicação, a partir de variáveis de ambiente, sem credenciais no código ou nas migrations.
 - As respostas 401 seguem o mesmo formato dos outros erros, mesmo sendo geradas pelo Spring Security, antes de a requisição chegar aos controllers.
+
+**Dados separados por usuário.** Todo registro tem um dono, e o dono vem sempre do **token**, nunca do corpo da requisição.
+- Todas as buscas filtram pelo usuário autenticado, inclusive as do orçamento: ninguém consegue usar a impressora, o filamento ou a margem de outra pessoa num cálculo.
+- O registro de outro usuário responde **404, e não 403**, para não confirmar que aquele uuid existe.
+- A unicidade de nomes e percentuais é **por usuário**: dois usuários podem ter, cada um, o seu "PETG" ou a sua margem "Varejo".
+- Energia e acabamento são uma configuração por usuário, garantida por um índice único no banco.
+- A migration que introduziu o dono atribuiu os dados existentes ao administrador com uma subconsulta, sem ids fixos, para funcionar em qualquer ambiente.
 
 ---
 
@@ -219,6 +228,18 @@ Todos os erros seguem o mesmo formato:
    ```
 
    Na primeira execução, o Flyway cria todas as tabelas. A API sobe na porta `8080`, ou na porta definida na variável `PORT`.
+
+4. Crie uma conta e obtenha um token:
+
+   ```json
+   POST /auth/cadastro
+   { "nome": "Seu Nome", "nomeUsuario": "seu.usuario", "senha": "<senha-com-8-caracteres-ou-mais>" }
+
+   POST /auth/login
+   { "nomeUsuario": "seu.usuario", "senha": "<senha>" }
+   ```
+
+   O token devolvido pelo login vai no cabeçalho `Authorization` das outras rotas.
 
 ### Com Docker
 
