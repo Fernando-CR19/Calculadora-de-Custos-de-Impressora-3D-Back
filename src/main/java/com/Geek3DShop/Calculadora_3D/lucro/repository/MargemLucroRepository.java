@@ -1,6 +1,7 @@
 package com.Geek3DShop.Calculadora_3D.lucro.repository;
 
 import com.Geek3DShop.Calculadora_3D.lucro.entity.MargemLucro;
+import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,16 +13,18 @@ import java.util.UUID;
 @Repository
 public interface MargemLucroRepository extends JpaRepository<MargemLucro, Integer> {
 
-    boolean existsByNomeIgnoreCaseAndDeletedFalse(String nome);
+    boolean existsByUsuarioAndNomeIgnoreCaseAndDeletedFalse(Usuario usuario, String nome);
 
-    boolean existsByPercentualAndDeletedFalse(BigDecimal percentual);
+    boolean existsByUsuarioAndPercentualAndDeletedFalse(Usuario usuario, BigDecimal percentual);
 
-    List<MargemLucro> findByDeletedFalseAndActiveTrueOrderByPercentualAsc();
+    List<MargemLucro> findByUsuarioAndDeletedFalseAndActiveTrueOrderByPercentualAsc(Usuario usuario);
 
     Optional<MargemLucro> findByUuidAndActiveTrueAndDeletedFalse(UUID uuid);
 
-    boolean existsByNomeIgnoreCaseAndDeletedFalseAndUuidNot(String nome, UUID uuid);
+    Optional<MargemLucro> findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(Usuario usuario, UUID uuid);
 
-    boolean existsByPercentualAndDeletedFalseAndUuidNot(BigDecimal percentual, UUID uuid);
+    boolean existsByUsuarioAndNomeIgnoreCaseAndDeletedFalseAndUuidNot(Usuario usuario, String nome, UUID uuid);
+
+    boolean existsByUsuarioAndPercentualAndDeletedFalseAndUuidNot(Usuario usuario, BigDecimal percentual, UUID uuid);
 
 }

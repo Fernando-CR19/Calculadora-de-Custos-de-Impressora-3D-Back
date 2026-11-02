@@ -1,5 +1,6 @@
 package com.Geek3DShop.Calculadora_3D.lucro.entity;
 
+import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,11 +39,16 @@ public class MargemLucro {
 
     private boolean deleted = false;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+
     private String nome;
 
     private BigDecimal percentual;
 
-    public MargemLucro(String nome, BigDecimal percentual) {
+    public MargemLucro(Usuario usuario, String nome, BigDecimal percentual) {
+        this.usuario = usuario;
         this.nome = nome;
         this.percentual = percentual;
     }
