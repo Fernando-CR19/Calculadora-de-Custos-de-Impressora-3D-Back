@@ -16,8 +16,6 @@ public interface ConsumivelRepository extends JpaRepository<Consumivel, Integer>
 
     List<Consumivel> findByUsuarioAndActiveTrueAndDeletedFalseOrderByNomeAsc(Usuario usuario);
 
-    Optional<Consumivel> findByUuidAndActiveTrueAndDeletedFalse(UUID uuid);
-
     Optional<Consumivel> findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(Usuario usuario, UUID uuid);
 
     Optional<Consumivel> findByUsuarioAndNomeIgnoreCaseAndUuidNot(Usuario usuario, String nome, UUID uuid);

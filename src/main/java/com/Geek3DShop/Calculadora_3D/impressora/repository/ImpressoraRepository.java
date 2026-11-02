@@ -16,8 +16,6 @@ public interface ImpressoraRepository extends JpaRepository<Impressora, Integer>
 
     List<Impressora> findByUsuarioAndActiveTrueAndDeletedFalseOrderByNomeAsc(Usuario usuario);
 
-    Optional<Impressora> findByUuidAndActiveTrueAndDeletedFalse(UUID uuid);
-
     Optional<Impressora> findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(Usuario usuario, UUID uuid);
 
     Optional<Impressora> findByUsuarioAndNomeIgnoreCaseAndUuidNot(Usuario usuario, String nome, UUID uuid);

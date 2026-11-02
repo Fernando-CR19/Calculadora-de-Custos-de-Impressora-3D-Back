@@ -10,8 +10,6 @@ import java.util.Optional;
 @Repository
 public interface AcabamentoRepository extends JpaRepository<Acabamento, Integer> {
 
-    Optional<Acabamento> findFirstByOrderByIdAsc();
-
     Optional<Acabamento> findByUsuario(Usuario usuario);
 
 }

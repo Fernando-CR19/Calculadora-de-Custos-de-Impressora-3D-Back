@@ -18,8 +18,6 @@ public interface FilamentoRepository extends JpaRepository<Filamento, Integer> {
 
     List<Filamento> findByUsuarioAndActiveTrueAndDeletedFalseOrderByMaterialNomeAscCorAsc(Usuario usuario);
 
-    Optional<Filamento> findByUuidAndActiveTrueAndDeletedFalse(UUID uuid);
-
     Optional<Filamento> findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(Usuario usuario, UUID uuid);
 
     Optional<Filamento> findByCorIgnoreCaseAndMaterialUuidAndUuidNot(String cor, UUID materialUuid, UUID uuid);

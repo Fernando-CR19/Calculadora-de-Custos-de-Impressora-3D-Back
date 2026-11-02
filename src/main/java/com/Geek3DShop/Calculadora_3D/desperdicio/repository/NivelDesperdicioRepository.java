@@ -19,8 +19,6 @@ public interface NivelDesperdicioRepository extends JpaRepository<NivelDesperdic
 
     List<NivelDesperdicio> findByUsuarioAndDeletedFalseAndActiveTrueOrderByPercentualAsc(Usuario usuario);
 
-    Optional<NivelDesperdicio> findByUuidAndDeletedFalseAndActiveTrue(UUID uuid);
-
     Optional<NivelDesperdicio> findByUsuarioAndUuidAndDeletedFalseAndActiveTrue(Usuario usuario, UUID uuid);
 
     boolean existsByUsuarioAndNomeIgnoreCaseAndDeletedFalseAndUuidNot(Usuario usuario, String nome, UUID uuid);

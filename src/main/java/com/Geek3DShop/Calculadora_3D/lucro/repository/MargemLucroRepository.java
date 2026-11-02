@@ -19,8 +19,6 @@ public interface MargemLucroRepository extends JpaRepository<MargemLucro, Intege
 
     List<MargemLucro> findByUsuarioAndDeletedFalseAndActiveTrueOrderByPercentualAsc(Usuario usuario);
 
-    Optional<MargemLucro> findByUuidAndActiveTrueAndDeletedFalse(UUID uuid);
-
     Optional<MargemLucro> findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(Usuario usuario, UUID uuid);
 
     boolean existsByUsuarioAndNomeIgnoreCaseAndDeletedFalseAndUuidNot(Usuario usuario, String nome, UUID uuid);

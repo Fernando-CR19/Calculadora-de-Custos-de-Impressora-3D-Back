@@ -15,6 +15,7 @@ import com.Geek3DShop.Calculadora_3D.orcamento.dto.OrcamentoResponseDto;
 import com.Geek3DShop.Calculadora_3D.potencia.repository.PotenciaImpressoraRepository;
 import com.Geek3DShop.Calculadora_3D.shared.exception.BusinessRuleException;
 import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceNotFoundException;
+import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,30 +40,31 @@ public class OrcamentoService {
     private final PotenciaImpressoraRepository potenciaImpressoraRepository;
 
     @Transactional(readOnly = true)
-    public OrcamentoResponseDto calcularOrcamento(OrcamentoRequestDto orcamentoRequestDto) {
-        var resultadoFilamentos = this.calcularFilamentos(orcamentoRequestDto.filamentos());
+    public OrcamentoResponseDto calcularOrcamento(Usuario usuario, OrcamentoRequestDto orcamentoRequestDto) {
+        var resultadoFilamentos = this.calcularFilamentos(usuario, orcamentoRequestDto.filamentos());
 
         var resultadoImpressao = this.calcularCustoImpressao(
+                usuario,
                 orcamentoRequestDto.horasDeImpressao(),
                 orcamentoRequestDto.minutosDeImpressao(),
                 orcamentoRequestDto.uuidImpressora(),
                 resultadoFilamentos.material()
         );
 
-        var custoDesperdicio = this.calcularDesperdicio(orcamentoRequestDto.uuidNivelDesperdicio(), resultadoFilamentos.custoTotalFilamento());
+        var custoDesperdicio = this.calcularDesperdicio(usuario, orcamentoRequestDto.uuidNivelDesperdicio(), resultadoFilamentos.custoTotalFilamento());
 
         var custoBase = resultadoFilamentos.custoTotalFilamento()
                 .add(custoDesperdicio)
                 .add(resultadoImpressao.custoEnergia())
                 .add(resultadoImpressao.depreciacao());
 
-        var custoAcabamento = this.calcularAcabamento(orcamentoRequestDto.horasDeAcabamento(), orcamentoRequestDto.minutosDeAcabamento());
+        var custoAcabamento = this.calcularAcabamento(usuario, orcamentoRequestDto.horasDeAcabamento(), orcamentoRequestDto.minutosDeAcabamento());
 
-        var custoConsumiveis = this.calcularConsumiveis(orcamentoRequestDto.uuidsConsumiveis());
+        var custoConsumiveis = this.calcularConsumiveis(usuario, orcamentoRequestDto.uuidsConsumiveis());
 
         var custoTotal = custoBase.add(custoAcabamento).add(custoConsumiveis);
 
-        var fatorLucro = this.buscarFatorLucro(orcamentoRequestDto.uuidMargemLucro());
+        var fatorLucro = this.buscarFatorLucro(usuario, orcamentoRequestDto.uuidMargemLucro());
 
         var valorSugerido = custoTotal.multiply(fatorLucro);
 
@@ -83,7 +85,7 @@ public class OrcamentoService {
         );
     }
 
-    private ResultadoFilamento calcularFilamentos(List<FilamentoUsadoDto> filamentosUsados) {
+    private ResultadoFilamento calcularFilamentos(Usuario usuario, List<FilamentoUsadoDto> filamentosUsados) {
         var custoFilamentos = new ArrayList<CustoFilamentoDto>();
         var custoTotalFilamento = BigDecimal.ZERO;
         Material material = null;
@@ -91,7 +93,7 @@ public class OrcamentoService {
         for (FilamentoUsadoDto filamentoUsado : filamentosUsados) {
             // Busca pelo filamento
             var filamentoUuid = filamentoUsado.uuid();
-            var filamentoFound = filamentoRepository.findByUuidAndActiveTrueAndDeletedFalse(filamentoUuid).orElseThrow(
+            var filamentoFound = filamentoRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, filamentoUuid).orElseThrow(
                     () -> new ResourceNotFoundException("Filamento: " + filamentoUuid + " não encontrado")
             );
 
@@ -110,7 +112,6 @@ public class OrcamentoService {
             var custoDoFilamento = precoKg.multiply(gramasUsadas).divide(divisor, 4, RoundingMode.HALF_UP);
             custoTotalFilamento = custoTotalFilamento.add(custoDoFilamento);
 
-
             CustoFilamentoDto custoFilamento = new CustoFilamentoDto(
                     filamentoFound.getCor(),
                     filamentoFound.getMaterial().getNome(),
@@ -124,7 +125,7 @@ public class OrcamentoService {
         return new ResultadoFilamento(custoFilamentos, custoTotalFilamento, material);
     }
 
-    private ResultadoImpressao calcularCustoImpressao(Integer horasDeImpressao, Integer minutosDeImpressao, UUID uuidImpressora, Material material) {
+    private ResultadoImpressao calcularCustoImpressao(Usuario usuario, Integer horasDeImpressao, Integer minutosDeImpressao, UUID uuidImpressora, Material material) {
         // Converter o tempo total de impressão para BigDecimal
         BigDecimal horasDecimal = BigDecimal.valueOf(horasDeImpressao);
         BigDecimal minutosDecimal = BigDecimal.valueOf(minutosDeImpressao);
@@ -133,10 +134,10 @@ public class OrcamentoService {
         var tempoImpressao = horasDecimal.add(minutosDecimal.divide(horaEmMinuto, 4, RoundingMode.HALF_UP));
 
         // Busca a impressora e potência
-        var impressoraFound = impressoraRepository.findByUuidAndActiveTrueAndDeletedFalse(uuidImpressora).orElseThrow(
+        var impressoraFound = impressoraRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidImpressora).orElseThrow(
                 () -> new ResourceNotFoundException("Impressora: " + uuidImpressora + " não foi encontrada")
         );
-        var potenciaImpressoraFound = potenciaImpressoraRepository.findByImpressoraUuidAndImpressoraActiveTrueAndImpressoraDeletedFalseAndMaterialUuidAndMaterialActiveTrueAndMaterialDeletedFalse(impressoraFound.getUuid(), material.getUuid()).orElseThrow(
+        var potenciaImpressoraFound = potenciaImpressoraRepository.findByImpressoraIdAndMaterialUuidAndMaterialActiveTrueAndMaterialDeletedFalse(impressoraFound.getId(), material.getUuid()).orElseThrow(
                 () -> new ResourceNotFoundException("Não há potência cadastrada para: " + impressoraFound.getNome() + " com material: " + material.getNome())
         );
 
@@ -149,12 +150,12 @@ public class OrcamentoService {
         var energiaWh = potenciaMediaW.multiply(tempoImpressao);
         var energiaKwh = energiaWh.divide(divisor, 4, RoundingMode.HALF_UP);
 
-        var energia = energiaRepository.findFirstByOrderByIdAsc().orElseThrow(
-                () -> new ResourceNotFoundException("Não há fatura de energia cadastrada")
+        var energia = energiaRepository.findByUsuario(usuario).orElseThrow(
+                () -> new ResourceNotFoundException("Não há fatura de energia cadastrada, cadastre a fatura de energia do mês antes de fazer um orçamento")
         );
 
-        var precokwh = energia.calcularPrecoKwh();
-        var custoEnergia = energiaKwh.multiply(precokwh);
+        var precoKwh = energia.calcularPrecoKwh();
+        var custoEnergia = energiaKwh.multiply(precoKwh);
 
         // Cálculo da depreciação
         var depreciacaoPorHora = impressoraFound.calcularDepreciacaoPorHora();
@@ -163,10 +164,10 @@ public class OrcamentoService {
         return new ResultadoImpressao(tempoImpressao, energiaKwh, custoEnergia, depreciacao);
     }
 
-    private BigDecimal calcularDesperdicio(UUID uuidNivelDesperdicio, BigDecimal custoTotalFilamento) {
+    private BigDecimal calcularDesperdicio(Usuario usuario, UUID uuidNivelDesperdicio, BigDecimal custoTotalFilamento) {
         BigDecimal divisor = new BigDecimal("100");
 
-        var nivelDesperdicio = nivelDesperdicioRepository.findByUuidAndDeletedFalseAndActiveTrue(uuidNivelDesperdicio).orElseThrow(
+        var nivelDesperdicio = nivelDesperdicioRepository.findByUsuarioAndUuidAndDeletedFalseAndActiveTrue(usuario, uuidNivelDesperdicio).orElseThrow(
                 () -> new ResourceNotFoundException("Nível de desperdício: " + uuidNivelDesperdicio + " não foi encontrado")
         );
 
@@ -174,13 +175,13 @@ public class OrcamentoService {
         return desperdicio.divide(divisor, 4, RoundingMode.HALF_UP);
     }
 
-    private BigDecimal calcularAcabamento(Integer horasDeAcabamento, Integer minutosDeAcabamento) {
+    private BigDecimal calcularAcabamento(Usuario usuario, Integer horasDeAcabamento, Integer minutosDeAcabamento) {
         if (horasDeAcabamento == 0 && minutosDeAcabamento == 0) {
             return BigDecimal.ZERO;
         }
 
-        var valorAcabamento = acabamentoRepository.findFirstByOrderByIdAsc().orElseThrow(
-                () -> new ResourceNotFoundException("O valor cobrado no acabamento ainda não foi cadastrado")
+        var valorAcabamento = acabamentoRepository.findByUsuario(usuario).orElseThrow(
+                () -> new ResourceNotFoundException("O valor da hora de acabamento ainda não foi cadastrado. Cadastre o valor da hora de acabamento ou informe tempo de acabamento zero no orçamento")
         );
 
         var valorPorMinuto = valorAcabamento.calcularValorPorMinuto();
@@ -191,7 +192,7 @@ public class OrcamentoService {
         return tempoTrabalhadoDecimal.multiply(valorPorMinuto);
     }
 
-    private BigDecimal calcularConsumiveis(Set<UUID> uuidsConsumiveis) {
+    private BigDecimal calcularConsumiveis(Usuario usuario, Set<UUID> uuidsConsumiveis) {
         if (uuidsConsumiveis.isEmpty()) {
             return BigDecimal.ZERO;
         }
@@ -199,7 +200,7 @@ public class OrcamentoService {
         var custoTotalConsumiveis = BigDecimal.ZERO;
 
         for (UUID uuidConsumivel : uuidsConsumiveis) {
-            var consumivelFound = consumivelRepository.findByUuidAndActiveTrueAndDeletedFalse(uuidConsumivel).orElseThrow(
+            var consumivelFound = consumivelRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidConsumivel).orElseThrow(
                     () -> new ResourceNotFoundException("O consumível: " + uuidConsumivel + " não foi encontrado")
             );
 
@@ -210,8 +211,8 @@ public class OrcamentoService {
         return custoTotalConsumiveis;
     }
 
-    private BigDecimal buscarFatorLucro(UUID uuidMargemLucro) {
-        var margemLucro = margemLucroRepository.findByUuidAndActiveTrueAndDeletedFalse(uuidMargemLucro).orElseThrow(
+    private BigDecimal buscarFatorLucro(Usuario usuario, UUID uuidMargemLucro) {
+        var margemLucro = margemLucroRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidMargemLucro).orElseThrow(
                 () -> new ResourceNotFoundException("A margem de lucro: " + uuidMargemLucro + " não foi encontrada")
         );
 
