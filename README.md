@@ -115,7 +115,7 @@ Authorization: Bearer <token>
 | Recurso | Rotas |
 |---|---|
 | Autenticação | `POST` `/auth/login` _(pública)_ |
-| Materiais | `GET` `POST` `/materiais` · `PATCH` `DELETE` `/materiais/{uuid}` |
+| Materiais | `GET` `POST` `/materiais` · `PUT` `DELETE` `/materiais/{uuid}` |
 | Filamentos | `GET` `POST` `/filamentos` · `PUT` `DELETE` `/filamentos/{uuid}` |
 | Consumíveis | `GET` `POST` `/consumiveis` · `PUT` `DELETE` `/consumiveis/{uuid}` |
 | Níveis de desperdício | `GET` `POST` `/niveis-desperdicio` · `PUT` `DELETE` `/niveis-desperdicio/{uuid}` |
