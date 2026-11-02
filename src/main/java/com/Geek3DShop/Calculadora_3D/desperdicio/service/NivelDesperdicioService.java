@@ -7,6 +7,7 @@ import com.Geek3DShop.Calculadora_3D.desperdicio.entity.NivelDesperdicio;
 import com.Geek3DShop.Calculadora_3D.desperdicio.repository.NivelDesperdicioRepository;
 import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceAlreadyExistsException;
 import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceNotFoundException;
+import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,38 +23,38 @@ public class NivelDesperdicioService {
     }
 
     @Transactional
-    public NivelDesperdicioResponseDto createNivelDesperdicio(CreateNivelDesperdicioRequestDto nivelDesperdicioDto) {
-        if (nivelDesperdicioRepository.existsByNomeIgnoreCaseAndDeletedFalse(nivelDesperdicioDto.nome())) {
+    public NivelDesperdicioResponseDto createNivelDesperdicio(Usuario usuario, CreateNivelDesperdicioRequestDto nivelDesperdicioDto) {
+        if (nivelDesperdicioRepository.existsByUsuarioAndNomeIgnoreCaseAndDeletedFalse(usuario, nivelDesperdicioDto.nome())) {
             throw new ResourceAlreadyExistsException("O nível: " + nivelDesperdicioDto.nome() + " já está cadastrado");
         }
 
-        if (nivelDesperdicioRepository.existsByPercentualAndDeletedFalse(nivelDesperdicioDto.percentual())) {
+        if (nivelDesperdicioRepository.existsByUsuarioAndPercentualAndDeletedFalse(usuario, nivelDesperdicioDto.percentual())) {
             throw new ResourceAlreadyExistsException("O percentual: " + nivelDesperdicioDto.percentual() + " já está cadastrado");
         }
 
-        var entity = new NivelDesperdicio(nivelDesperdicioDto.nome(), nivelDesperdicioDto.percentual());
+        var entity = new NivelDesperdicio(usuario, nivelDesperdicioDto.nome(), nivelDesperdicioDto.percentual());
         var entitySaved = nivelDesperdicioRepository.save(entity);
 
         return NivelDesperdicioResponseDto.from(entitySaved);
     }
 
     @Transactional(readOnly = true)
-    public List<NivelDesperdicioResponseDto> listNiveisDesperdicio() {
-        var list = nivelDesperdicioRepository.findByDeletedFalseAndActiveTrueOrderByPercentualAsc();
+    public List<NivelDesperdicioResponseDto> listNiveisDesperdicio(Usuario usuario) {
+        var list = nivelDesperdicioRepository.findByUsuarioAndDeletedFalseAndActiveTrueOrderByPercentualAsc(usuario);
         return list.stream().map(NivelDesperdicioResponseDto::from).toList();
     }
 
     @Transactional
-    public NivelDesperdicioResponseDto updateNivelDesperdicio(UUID uuid, UpdateNivelDesperdicioDto nivelDesperdicioDto) {
-        NivelDesperdicio nivelDesperdicio = nivelDesperdicioRepository.findByUuidAndDeletedFalseAndActiveTrue(uuid).orElseThrow(
+    public NivelDesperdicioResponseDto updateNivelDesperdicio(Usuario usuario, UUID uuid, UpdateNivelDesperdicioDto nivelDesperdicioDto) {
+        NivelDesperdicio nivelDesperdicio = nivelDesperdicioRepository.findByUsuarioAndUuidAndDeletedFalseAndActiveTrue(usuario, uuid).orElseThrow(
                 () -> new ResourceNotFoundException("Nível de Desperdício: " + uuid + " não foi encontrado")
         );
 
-        if (nivelDesperdicioRepository.existsByNomeIgnoreCaseAndDeletedFalseAndUuidNot(nivelDesperdicioDto.nome(), uuid)) {
+        if (nivelDesperdicioRepository.existsByUsuarioAndNomeIgnoreCaseAndDeletedFalseAndUuidNot(usuario, nivelDesperdicioDto.nome(), uuid)) {
             throw new ResourceAlreadyExistsException("O nível: " + nivelDesperdicioDto.nome() + " já está cadastrado");
         }
 
-        if (nivelDesperdicioRepository.existsByPercentualAndDeletedFalseAndUuidNot(nivelDesperdicioDto.percentual(), uuid)) {
+        if (nivelDesperdicioRepository.existsByUsuarioAndPercentualAndDeletedFalseAndUuidNot(usuario, nivelDesperdicioDto.percentual(), uuid)) {
             throw new ResourceAlreadyExistsException("O percentual: " + nivelDesperdicioDto.percentual() + " já está cadastrado");
         }
 
@@ -66,8 +67,8 @@ public class NivelDesperdicioService {
     }
 
     @Transactional
-    public void deleteNivelDesperdicio(UUID uuid) {
-        NivelDesperdicio nivelDesperdicio = nivelDesperdicioRepository.findByUuidAndDeletedFalseAndActiveTrue(uuid).orElseThrow(
+    public void deleteNivelDesperdicio(Usuario usuario, UUID uuid) {
+        NivelDesperdicio nivelDesperdicio = nivelDesperdicioRepository.findByUsuarioAndUuidAndDeletedFalseAndActiveTrue(usuario, uuid).orElseThrow(
                 () -> new ResourceNotFoundException("Nível de Desperdício: " + uuid + " não foi encontrado")
         );
 
