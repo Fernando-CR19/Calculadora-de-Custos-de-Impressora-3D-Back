@@ -5,6 +5,7 @@ import com.Geek3DShop.Calculadora_3D.energia.dto.EnergiaResponseDto;
 import com.Geek3DShop.Calculadora_3D.energia.entity.Energia;
 import com.Geek3DShop.Calculadora_3D.energia.repository.EnergiaRepository;
 import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceNotFoundException;
+import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,8 +18,8 @@ public class EnergiaService {
     }
 
     @Transactional
-    public EnergiaResponseDto upsertEnergia(EnergiaRequestDto energiaRequestDto) {
-        var energia = energiaRepository.findFirstByOrderByIdAsc();
+    public EnergiaResponseDto upsertEnergia(Usuario usuario, EnergiaRequestDto energiaRequestDto) {
+        var energia = energiaRepository.findByUsuario(usuario);
 
         if (energia.isPresent()) {
             Energia energiaFound = energia.get();
@@ -32,15 +33,15 @@ public class EnergiaService {
         }
 
 
-        var entity = new Energia(energiaRequestDto.valorFatura(), energiaRequestDto.consumoKwh());
+        var entity = new Energia(usuario, energiaRequestDto.valorFatura(), energiaRequestDto.consumoKwh());
         var entitySaved = energiaRepository.save(entity);
 
         return EnergiaResponseDto.from(entitySaved);
     }
 
     @Transactional(readOnly = true)
-    public EnergiaResponseDto getEnergia() {
-        var energia = energiaRepository.findFirstByOrderByIdAsc().orElseThrow(
+    public EnergiaResponseDto getEnergia(Usuario usuario) {
+        var energia = energiaRepository.findByUsuario(usuario).orElseThrow(
                 () -> new ResourceNotFoundException("A fatura de energia ainda não foi cadastrada")
         );
 

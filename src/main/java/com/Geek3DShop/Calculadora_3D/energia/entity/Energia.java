@@ -1,9 +1,7 @@
 package com.Geek3DShop.Calculadora_3D.energia.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,11 +24,16 @@ public class Energia {
     @UpdateTimestamp
     private OffsetDateTime updatedAt;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+
     private BigDecimal valorFatura;
 
     private Integer consumoKwh;
 
-    public Energia(BigDecimal valorFatura, Integer consumoKwh) {
+    public Energia(Usuario usuario, BigDecimal valorFatura, Integer consumoKwh) {
+        this.usuario = usuario;
         this.valorFatura = valorFatura;
         this.consumoKwh = consumoKwh;
     }

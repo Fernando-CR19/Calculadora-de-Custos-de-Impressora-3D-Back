@@ -3,7 +3,9 @@ package com.Geek3DShop.Calculadora_3D.energia.controller;
 import com.Geek3DShop.Calculadora_3D.energia.dto.EnergiaRequestDto;
 import com.Geek3DShop.Calculadora_3D.energia.dto.EnergiaResponseDto;
 import com.Geek3DShop.Calculadora_3D.energia.service.EnergiaService;
+import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
 import jakarta.validation.Valid;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,12 +18,12 @@ public class EnergiaController {
     }
 
     @PutMapping
-    public EnergiaResponseDto upsertEnergia(@Valid @RequestBody EnergiaRequestDto energiaRequestDto) {
-        return energiaService.upsertEnergia(energiaRequestDto);
+    public EnergiaResponseDto upsertEnergia(@AuthenticationPrincipal Usuario usuario, @Valid @RequestBody EnergiaRequestDto energiaRequestDto) {
+        return energiaService.upsertEnergia(usuario, energiaRequestDto);
     }
 
     @GetMapping
-    public EnergiaResponseDto getEnergia() {
-        return energiaService.getEnergia();
+    public EnergiaResponseDto getEnergia(@AuthenticationPrincipal Usuario usuario) {
+        return energiaService.getEnergia(usuario);
     }
 }
