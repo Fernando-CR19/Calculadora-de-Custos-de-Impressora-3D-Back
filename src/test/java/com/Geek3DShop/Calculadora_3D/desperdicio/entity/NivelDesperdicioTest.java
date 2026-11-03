@@ -11,7 +11,7 @@ class NivelDesperdicioTest {
 
     @Test
     void deveSomarUmAoPercentualDivididoPorCem() {
-        // PREPARAR
+        // PREPARA
         String nomeNivel = "Pouco";
         BigDecimal meuPercentual = new BigDecimal("3");
 
@@ -29,7 +29,7 @@ class NivelDesperdicioTest {
 
     @Test
     void deveManterAsCasasDecimaisDoPercentualNoFator() {
-        // PREPARAR
+        // PREPARA
         String nomeNivel = "Pouco";
         BigDecimal meuPercentual = new BigDecimal("2.5");
 
@@ -41,7 +41,7 @@ class NivelDesperdicioTest {
         // VERIFICA
         BigDecimal valorEsperado = new BigDecimal("1.0250");
 
-        assertThat(fatorDesperdicio).isEqualByComparingTo(valorEsperado);
         assertThat(fatorDesperdicio.scale()).isEqualTo(4);
+        assertThat(fatorDesperdicio).isEqualByComparingTo(valorEsperado);
     }
 }
