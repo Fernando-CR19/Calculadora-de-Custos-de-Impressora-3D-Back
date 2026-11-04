@@ -23,8 +23,8 @@ class NivelDesperdicioTest {
         // VERIFICA
         BigDecimal valorEsperado = new BigDecimal("1.03");
 
-        assertThat(fatorDesperdicio).isEqualByComparingTo(valorEsperado);
         assertThat(fatorDesperdicio.scale()).isEqualTo(4);
+        assertThat(fatorDesperdicio).isEqualByComparingTo(valorEsperado);
     }
 
     @Test
