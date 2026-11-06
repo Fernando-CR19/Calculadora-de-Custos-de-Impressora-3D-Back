@@ -23,10 +23,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -133,6 +135,16 @@ class OrcamentoServiceTest {
         Set<UUID> uuidsConsumiveis = Set.of(uuidPitao, uuidSacola);
 
         OrcamentoRequestDto requestDto = new OrcamentoRequestDto(uuidImpressora, filamentosUsados, horasImpressao, minutosImpressao, uuidNivelDesperdicio, uuidMargemLucro, horasAcabamento, minutosAcabamento, uuidsConsumiveis);
+
+        // Mocks
+        when(filamentoRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidFilamento)).thenReturn(Optional.of(meuFilamento));
+        when(impressoraRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidImpressora)).thenReturn(Optional.of(minhaImpressora));
+        when(potenciaImpressoraRepository.findByImpressoraIdAndMaterialUuidAndMaterialActiveTrueAndMaterialDeletedFalse(idImpressora, uuidMaterial)).thenReturn(Optional.of(minhaPotencia));
+        when(energiaRepository.findByUsuario(usuario)).thenReturn(Optional.of(minhaEnergia));
+        when(nivelDesperdicioRepository.findByUsuarioAndUuidAndDeletedFalseAndActiveTrue(usuario, uuidNivelDesperdicio)).thenReturn(Optional.of(meuNivelDesperdicio));
+        when(consumivelRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidSacola)).thenReturn(Optional.of(sacola));
+        when(consumivelRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidPitao)).thenReturn(Optional.of(pitao));
+        when(margemLucroRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidMargemLucro)).thenReturn(Optional.of(minhaMargem));
 
         // EXECUTA
 
