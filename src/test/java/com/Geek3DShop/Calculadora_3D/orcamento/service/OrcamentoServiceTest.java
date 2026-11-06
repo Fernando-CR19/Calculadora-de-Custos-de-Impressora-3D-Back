@@ -27,7 +27,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
 import static org.mockito.Mockito.when;
+
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
@@ -315,6 +317,59 @@ class OrcamentoServiceTest {
 
     @Test
     void deveRecusarOrcamentoComEnergiaNaoCadastrada() {
+        // PREPARA
+        Usuario usuario = Usuario.builder().build();
 
+        Integer idImpressora = 1;
+        UUID uuidImpressora = UUID.randomUUID();
+        BigDecimal potenciaMediaAmsW = new BigDecimal("3.69");
+        Impressora minhaImpressora = Impressora.builder()
+                .potenciaMediaAmsW(potenciaMediaAmsW)
+                .build();
+        minhaImpressora.setId(idImpressora);
+
+        String nomeMaterial = "PETG";
+        UUID uuidMaterial = UUID.randomUUID();
+        Material meuMaterial = new Material(usuario, nomeMaterial);
+        meuMaterial.setUuid(uuidMaterial);
+
+        UUID uuidFilamento = UUID.randomUUID();
+        String corFilamento = "Preto";
+        BigDecimal precoKgFilamento = new BigDecimal("72.91");
+        Filamento meuFilamento = new Filamento(usuario, corFilamento, precoKgFilamento, meuMaterial);
+
+        BigDecimal gramasUsadas = new BigDecimal("18.21");
+        List<FilamentoUsadoDto> filamentosUsados = List.of(new FilamentoUsadoDto(uuidFilamento, gramasUsadas));
+
+        BigDecimal potenciaMediaPetg = new BigDecimal("75");
+        PotenciaImpressora minhaPotencia = new PotenciaImpressora(meuMaterial, minhaImpressora, potenciaMediaPetg);
+
+        Integer horasImpressao = 1;
+
+        Integer minutosImpressao = 18;
+
+        UUID uuidNivelDesperdicio = UUID.randomUUID();
+
+        UUID uuidMargemLucro = UUID.randomUUID();
+
+        Integer horasAcabamento = 0;
+
+        Integer minutosAcabamento = 0;
+
+        UUID uuidPitao = UUID.randomUUID();
+        UUID uuidSacola = UUID.randomUUID();
+        Set<UUID> uuidsConsumiveis = Set.of(uuidPitao, uuidSacola);
+
+        OrcamentoRequestDto requestDto = new OrcamentoRequestDto(uuidImpressora, filamentosUsados, horasImpressao, minutosImpressao, uuidNivelDesperdicio, uuidMargemLucro, horasAcabamento, minutosAcabamento, uuidsConsumiveis);
+
+        // Mocks
+        when(filamentoRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidFilamento)).thenReturn(Optional.of(meuFilamento));
+        when(impressoraRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidImpressora)).thenReturn(Optional.of(minhaImpressora));
+        when(potenciaImpressoraRepository.findByImpressoraIdAndMaterialUuidAndMaterialActiveTrueAndMaterialDeletedFalse(idImpressora, uuidMaterial)).thenReturn(Optional.of(minhaPotencia));
+
+        // EXECUTA e VERIFICA
+        assertThatThrownBy(() -> orcamentoService.calcularOrcamento(usuario, requestDto))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Não há fatura");
     }
 }
