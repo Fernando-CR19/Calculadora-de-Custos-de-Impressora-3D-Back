@@ -14,8 +14,10 @@ import com.Geek3DShop.Calculadora_3D.impressora.repository.ImpressoraRepository;
 import com.Geek3DShop.Calculadora_3D.lucro.entity.MargemLucro;
 import com.Geek3DShop.Calculadora_3D.lucro.repository.MargemLucroRepository;
 import com.Geek3DShop.Calculadora_3D.material.entity.Material;
+import com.Geek3DShop.Calculadora_3D.orcamento.dto.CustoFilamentoDto;
 import com.Geek3DShop.Calculadora_3D.orcamento.dto.FilamentoUsadoDto;
 import com.Geek3DShop.Calculadora_3D.orcamento.dto.OrcamentoRequestDto;
+import com.Geek3DShop.Calculadora_3D.orcamento.dto.OrcamentoResponseDto;
 import com.Geek3DShop.Calculadora_3D.potencia.entity.PotenciaImpressora;
 import com.Geek3DShop.Calculadora_3D.potencia.repository.PotenciaImpressoraRepository;
 import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
@@ -147,8 +149,68 @@ class OrcamentoServiceTest {
         when(margemLucroRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidMargemLucro)).thenReturn(Optional.of(minhaMargem));
 
         // EXECUTA
+        OrcamentoResponseDto meuOrcamento = orcamentoService.calcularOrcamento(usuario, requestDto);
 
         // VERIFICA
 
+        // Valor sugerido
+        BigDecimal valorSugerido = meuOrcamento.valorSugerido();
+        BigDecimal valorSugeridoEsperado = new BigDecimal("9.18");
+        assertThat(valorSugerido).isEqualByComparingTo(valorSugeridoEsperado);
+
+        // Custo total
+        BigDecimal custoTotal = meuOrcamento.custoTotal();
+        BigDecimal custoTotalEsperado = new BigDecimal("2.62");
+        assertThat(custoTotal).isEqualByComparingTo(custoTotalEsperado);
+
+        // Custo com filamentos
+        BigDecimal custoFilamentos = meuOrcamento.custoFilamentos();
+        BigDecimal custoFilamentosEsperado = new BigDecimal("1.33");
+        assertThat(custoFilamentos).isEqualByComparingTo(custoFilamentosEsperado);
+
+        // Custo com desperdício
+        BigDecimal custoDesperdicio = meuOrcamento.custoDesperdicio();
+        BigDecimal custoDesperdicioEsperado = new BigDecimal("0.04");
+        assertThat(custoDesperdicio).isEqualByComparingTo(custoDesperdicioEsperado);
+
+        // Custo com energia
+        BigDecimal custoEnergia = meuOrcamento.custoEnergia();
+        BigDecimal custoEnergiaEsperado = new BigDecimal("0.10");
+        assertThat(custoEnergia).isEqualByComparingTo(custoEnergiaEsperado);
+
+        // Custo da depreciação
+        BigDecimal custoDepreciacao = meuOrcamento.custoDepreciacao();
+        BigDecimal custoDepreciacaoEsperado = new BigDecimal("0.18");
+        assertThat(custoDepreciacao).isEqualByComparingTo(custoDepreciacaoEsperado);
+
+        // Custo base
+        BigDecimal custoBase = meuOrcamento.custoBase();
+        BigDecimal custoBaseEsperado = new BigDecimal("1.65");
+        assertThat(custoBase).isEqualByComparingTo(custoBaseEsperado);
+
+        // Custo com o acabamento
+        BigDecimal custoAcabamento = meuOrcamento.custoAcabamento();
+        BigDecimal custoAcabamentoEsperado = new BigDecimal("0.00");
+        assertThat(custoAcabamento).isEqualByComparingTo(custoAcabamentoEsperado);
+
+        // Custo com consumíveis
+        BigDecimal custoConsumiveis = meuOrcamento.custoConsumiveis();
+        BigDecimal custoConsumiveisEsperado = new BigDecimal("0.97");
+        assertThat(custoConsumiveis).isEqualByComparingTo(custoConsumiveisEsperado);
+
+        // Tempo de impressão
+        BigDecimal tempoImpressao = meuOrcamento.tempoImpressaoHoras();
+        BigDecimal tempoImpressaoEsperado = new BigDecimal("1.3000");
+        assertThat(tempoImpressao).isEqualByComparingTo(tempoImpressaoEsperado);
+
+        // Consumo de energia em kWh
+        BigDecimal consumoEnergia = meuOrcamento.consumoEnergiaKwh();
+        BigDecimal consumoEnergiaEsperado = new BigDecimal("0.1023");
+        assertThat(consumoEnergia).isEqualByComparingTo(consumoEnergiaEsperado);
+
+        // Fator de lucro
+        BigDecimal fatorLucro = meuOrcamento.fatorLucro();
+        BigDecimal fatorLucroEsperado = new BigDecimal("3.5000");
+        assertThat(fatorLucro).isEqualByComparingTo(fatorLucroEsperado);
     }
 }
