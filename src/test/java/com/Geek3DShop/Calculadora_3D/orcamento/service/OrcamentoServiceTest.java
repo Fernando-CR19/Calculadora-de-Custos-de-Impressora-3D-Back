@@ -20,6 +20,7 @@ import com.Geek3DShop.Calculadora_3D.orcamento.dto.OrcamentoRequestDto;
 import com.Geek3DShop.Calculadora_3D.orcamento.dto.OrcamentoResponseDto;
 import com.Geek3DShop.Calculadora_3D.potencia.entity.PotenciaImpressora;
 import com.Geek3DShop.Calculadora_3D.potencia.repository.PotenciaImpressoraRepository;
+import com.Geek3DShop.Calculadora_3D.shared.exception.BusinessRuleException;
 import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +36,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
 class OrcamentoServiceTest {
@@ -212,5 +214,64 @@ class OrcamentoServiceTest {
         BigDecimal fatorLucro = meuOrcamento.fatorLucro();
         BigDecimal fatorLucroEsperado = new BigDecimal("3.5000");
         assertThat(fatorLucro).isEqualByComparingTo(fatorLucroEsperado);
+    }
+
+    @Test
+    void deveRecusarOrcamentoComFilamentosDeMateriaisDiferentes() {
+        // PREPARA
+        Usuario usuario = Usuario.builder().build();
+
+        UUID uuidImpressora = UUID.randomUUID();
+
+        String nomeMaterialPETG = "PETG";
+        Integer idMaterialPETG = 1;
+        Material meuMaterialPETG = new Material(usuario, nomeMaterialPETG);
+        meuMaterialPETG.setId(idMaterialPETG);
+
+        String nomeMaterialPLA = "PLA";
+        Integer idMaterialPLA = 2;
+        Material meuMaterialPLA = new Material(usuario, nomeMaterialPLA);
+        meuMaterialPLA.setId(idMaterialPLA);
+
+        UUID uuidFilamentoPETG = UUID.randomUUID();
+        String corFilamentoPETG = "Preto";
+        BigDecimal precoKgFilamentoPETG = new BigDecimal("72.91");
+        Filamento meuFilamentoPETG = new Filamento(usuario, corFilamentoPETG, precoKgFilamentoPETG, meuMaterialPETG);
+
+        UUID uuidFilamentoPLA = UUID.randomUUID();
+        String corFilamentoPLA = "Branco";
+        BigDecimal precoKgFilamentoPLA = new BigDecimal("76.80");
+        Filamento meuFilamentoPLA = new Filamento(usuario, corFilamentoPLA, precoKgFilamentoPLA, meuMaterialPLA);
+
+        BigDecimal gramasUsadasPETG = new BigDecimal("18.21");
+        BigDecimal gramasUsadasPLA = new BigDecimal("0.92");
+
+        List<FilamentoUsadoDto> filamentosUsados = List.of(new FilamentoUsadoDto(uuidFilamentoPETG, gramasUsadasPETG), new FilamentoUsadoDto(uuidFilamentoPLA, gramasUsadasPLA));
+
+        Integer horasImpressao = 1;
+
+        Integer minutosImpressao = 18;
+
+        UUID uuidNivelDesperdicio = UUID.randomUUID();
+
+        UUID uuidMargemLucro = UUID.randomUUID();
+
+        Integer horasAcabamento = 0;
+
+        Integer minutosAcabamento = 0;
+
+        UUID uuidPitao = UUID.randomUUID();
+        UUID uuidSacola = UUID.randomUUID();
+        Set<UUID> uuidsConsumiveis = Set.of(uuidPitao, uuidSacola);
+
+        OrcamentoRequestDto requestDto = new OrcamentoRequestDto(uuidImpressora, filamentosUsados, horasImpressao, minutosImpressao, uuidNivelDesperdicio, uuidMargemLucro, horasAcabamento, minutosAcabamento, uuidsConsumiveis);
+
+        // Mocks
+        when(filamentoRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidFilamentoPETG)).thenReturn(Optional.of(meuFilamentoPETG));
+        when(filamentoRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidFilamentoPLA)).thenReturn(Optional.of(meuFilamentoPLA));
+
+        assertThatThrownBy(() -> orcamentoService.calcularOrcamento(usuario, requestDto))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("materiais diferentes");
     }
 }
