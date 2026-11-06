@@ -21,6 +21,7 @@ import com.Geek3DShop.Calculadora_3D.orcamento.dto.OrcamentoResponseDto;
 import com.Geek3DShop.Calculadora_3D.potencia.entity.PotenciaImpressora;
 import com.Geek3DShop.Calculadora_3D.potencia.repository.PotenciaImpressoraRepository;
 import com.Geek3DShop.Calculadora_3D.shared.exception.BusinessRuleException;
+import com.Geek3DShop.Calculadora_3D.shared.exception.ResourceNotFoundException;
 import com.Geek3DShop.Calculadora_3D.usuario.entity.Usuario;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -270,8 +271,50 @@ class OrcamentoServiceTest {
         when(filamentoRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidFilamentoPETG)).thenReturn(Optional.of(meuFilamentoPETG));
         when(filamentoRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidFilamentoPLA)).thenReturn(Optional.of(meuFilamentoPLA));
 
+        // EXECUTA e VERIFICA
         assertThatThrownBy(() -> orcamentoService.calcularOrcamento(usuario, requestDto))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessageContaining("materiais diferentes");
+    }
+
+    @Test
+    void deveRecusarOrcamentoComFilamentoAusente() {
+        // PREPARA
+        Usuario usuario = Usuario.builder().build();
+
+        UUID uuidImpressora = UUID.randomUUID();
+
+        UUID uuidFilamento = UUID.randomUUID();
+        BigDecimal gramasUsadas = new BigDecimal("18.21");
+
+        List<FilamentoUsadoDto> filamentosUsados = List.of(new FilamentoUsadoDto(uuidFilamento, gramasUsadas));
+
+        Integer horasImpressao = 1;
+
+        Integer minutosImpressao = 18;
+
+        UUID uuidNivelDesperdicio = UUID.randomUUID();
+
+        UUID uuidMargemLucro = UUID.randomUUID();
+
+        Integer horasAcabamento = 0;
+
+        Integer minutosAcabamento = 0;
+
+        UUID uuidPitao = UUID.randomUUID();
+        UUID uuidSacola = UUID.randomUUID();
+        Set<UUID> uuidsConsumiveis = Set.of(uuidPitao, uuidSacola);
+
+        OrcamentoRequestDto requestDto = new OrcamentoRequestDto(uuidImpressora, filamentosUsados, horasImpressao, minutosImpressao, uuidNivelDesperdicio, uuidMargemLucro, horasAcabamento, minutosAcabamento, uuidsConsumiveis);
+
+        // EXECUTA e VERIFICA
+        assertThatThrownBy(() -> orcamentoService.calcularOrcamento(usuario, requestDto))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Filamento: " + uuidFilamento);
+    }
+
+    @Test
+    void deveRecusarOrcamentoComEnergiaNaoCadastrada() {
+
     }
 }
