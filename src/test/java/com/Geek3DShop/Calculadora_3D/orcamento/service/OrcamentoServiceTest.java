@@ -217,6 +217,29 @@ class OrcamentoServiceTest {
         BigDecimal fatorLucro = meuOrcamento.fatorLucro();
         BigDecimal fatorLucroEsperado = new BigDecimal("3.5000");
         assertThat(fatorLucro).isEqualByComparingTo(fatorLucroEsperado);
+
+        // Filamentos
+        List<CustoFilamentoDto> filamentos = meuOrcamento.filamentos();
+        assertThat(filamentos).hasSize(1);
+
+        CustoFilamentoDto filamentoUsado = filamentos.getFirst();
+
+        String filamentoUsadoCor = filamentoUsado.cor();
+        String filamentoUsadoCorEsperado = "Preto";
+
+        String filamentoUsadoMaterial = filamentoUsado.material();
+        String filamentoUsadoMaterialEsperado = "PETG";
+
+        BigDecimal filamentoUsadoGramas = filamentoUsado.gramas();
+        BigDecimal filamentoUsadoGramasEsperado = new BigDecimal("18.21");
+
+        BigDecimal filamentoUsadoCusto = filamentoUsado.custo();
+        BigDecimal filamentoUsadoCustoEsperado = new BigDecimal("1.33");
+
+        assertThat(filamentoUsadoCor).isEqualTo(filamentoUsadoCorEsperado);
+        assertThat(filamentoUsadoMaterial).isEqualTo(filamentoUsadoMaterialEsperado);
+        assertThat(filamentoUsadoGramas).isEqualByComparingTo(filamentoUsadoGramasEsperado);
+        assertThat(filamentoUsadoCusto).isEqualByComparingTo(filamentoUsadoCustoEsperado);
     }
 
     @Test
