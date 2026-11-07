@@ -1,5 +1,6 @@
 package com.Geek3DShop.Calculadora_3D.orcamento.service;
 
+import com.Geek3DShop.Calculadora_3D.acabamento.entity.Acabamento;
 import com.Geek3DShop.Calculadora_3D.acabamento.repository.AcabamentoRepository;
 import com.Geek3DShop.Calculadora_3D.consumivel.entity.Consumivel;
 import com.Geek3DShop.Calculadora_3D.consumivel.repository.ConsumivelRepository;
@@ -465,5 +466,174 @@ class OrcamentoServiceTest {
         assertThatThrownBy(() -> orcamentoService.calcularOrcamento(usuario, requestDto))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("hora de acabamento");
+    }
+
+    @Test
+    void deveIncluirOCustoDoAcabamentoNoOrcamento() {
+        // PREPARA
+        Usuario usuario = Usuario.builder().build();
+
+        Integer idImpressora = 1;
+        UUID uuidImpressora = UUID.randomUUID();
+        BigDecimal custoAquisicaoImpressora = new BigDecimal("1409");
+        Integer vidaUtilImpressora = 10000;
+        BigDecimal potenciaMediaAmsW = new BigDecimal("3.69");
+        Impressora minhaImpressora = Impressora.builder()
+                .custoAquisicao(custoAquisicaoImpressora)
+                .vidaUtilHoras(vidaUtilImpressora)
+                .potenciaMediaAmsW(potenciaMediaAmsW)
+                .build();
+        minhaImpressora.setId(idImpressora);
+        minhaImpressora.setUuid(uuidImpressora);
+
+        String nomeMaterial = "PETG";
+        UUID uuidMaterial = UUID.randomUUID();
+        Integer idMaterial = 1;
+        Material meuMaterial = new Material(usuario, nomeMaterial);
+        meuMaterial.setId(idMaterial);
+        meuMaterial.setUuid(uuidMaterial);
+
+        UUID uuidFilamento = UUID.randomUUID();
+        String corFilamento = "Preto";
+        BigDecimal precoKgFilamento = new BigDecimal("72.91");
+        Filamento meuFilamento = new Filamento(usuario, corFilamento, precoKgFilamento, meuMaterial);
+
+        BigDecimal gramasUsadas = new BigDecimal("85");
+        List<FilamentoUsadoDto> filamentosUsados = List.of(new FilamentoUsadoDto(uuidFilamento, gramasUsadas));
+
+        BigDecimal potenciaMediaPetg = new BigDecimal("75");
+        PotenciaImpressora minhaPotencia = new PotenciaImpressora(meuMaterial, minhaImpressora, potenciaMediaPetg);
+
+        BigDecimal valorFatura = new BigDecimal("100.66");
+        Integer consumoKwh = 100;
+        Energia minhaEnergia = new Energia(usuario, valorFatura, consumoKwh);
+
+        BigDecimal percentualDesperdicio = new BigDecimal("3");
+        NivelDesperdicio meuNivelDesperdicio = new NivelDesperdicio(usuario, null, percentualDesperdicio);
+
+        BigDecimal percentualLucro = new BigDecimal("250");
+        MargemLucro minhaMargem = new MargemLucro(usuario, null, percentualLucro);
+
+        BigDecimal precoKitSacola = new BigDecimal("19.3");
+        Integer quantidadeKitSacola = 100;
+        Consumivel sacola = new Consumivel(usuario, null, precoKitSacola, quantidadeKitSacola);
+
+        BigDecimal valorHora = new BigDecimal("30");
+        Acabamento meuAcabamento = new Acabamento(usuario, valorHora);
+
+        Integer horasImpressao = 2;
+
+        Integer minutosImpressao = 5;
+
+        UUID uuidNivelDesperdicio = UUID.randomUUID();
+
+        UUID uuidMargemLucro = UUID.randomUUID();
+
+        Integer horasAcabamento = 0;
+
+        Integer minutosAcabamento = 30;
+
+        UUID uuidSacola = UUID.randomUUID();
+        Set<UUID> uuidsConsumiveis = Set.of(uuidSacola);
+
+        OrcamentoRequestDto requestDto = new OrcamentoRequestDto(uuidImpressora, filamentosUsados, horasImpressao, minutosImpressao, uuidNivelDesperdicio, uuidMargemLucro, horasAcabamento, minutosAcabamento, uuidsConsumiveis);
+
+        // Mocks
+        when(filamentoRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidFilamento)).thenReturn(Optional.of(meuFilamento));
+        when(impressoraRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidImpressora)).thenReturn(Optional.of(minhaImpressora));
+        when(potenciaImpressoraRepository.findByImpressoraIdAndMaterialUuidAndMaterialActiveTrueAndMaterialDeletedFalse(idImpressora, uuidMaterial)).thenReturn(Optional.of(minhaPotencia));
+        when(energiaRepository.findByUsuario(usuario)).thenReturn(Optional.of(minhaEnergia));
+        when(nivelDesperdicioRepository.findByUsuarioAndUuidAndDeletedFalseAndActiveTrue(usuario, uuidNivelDesperdicio)).thenReturn(Optional.of(meuNivelDesperdicio));
+        when(acabamentoRepository.findByUsuario(usuario)).thenReturn(Optional.of(meuAcabamento));
+        when(consumivelRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidSacola)).thenReturn(Optional.of(sacola));
+        when(margemLucroRepository.findByUsuarioAndUuidAndActiveTrueAndDeletedFalse(usuario, uuidMargemLucro)).thenReturn(Optional.of(minhaMargem));
+
+        // EXECUTA
+        OrcamentoResponseDto meuOrcamento = orcamentoService.calcularOrcamento(usuario, requestDto);
+
+        // VERIFICA
+
+        // Valor sugerido
+        BigDecimal valorSugerido = meuOrcamento.valorSugerido();
+        BigDecimal valorSugeridoEsperado = new BigDecimal("77.12");
+        assertThat(valorSugerido).isEqualByComparingTo(valorSugeridoEsperado);
+
+        // Custo total
+        BigDecimal custoTotal = meuOrcamento.custoTotal();
+        BigDecimal custoTotalEsperado = new BigDecimal("22.03");
+        assertThat(custoTotal).isEqualByComparingTo(custoTotalEsperado);
+
+        // Custo com filamentos
+        BigDecimal custoFilamentos = meuOrcamento.custoFilamentos();
+        BigDecimal custoFilamentosEsperado = new BigDecimal("6.20");
+        assertThat(custoFilamentos).isEqualByComparingTo(custoFilamentosEsperado);
+
+        // Custo com desperdício
+        BigDecimal custoDesperdicio = meuOrcamento.custoDesperdicio();
+        BigDecimal custoDesperdicioEsperado = new BigDecimal("0.19");
+        assertThat(custoDesperdicio).isEqualByComparingTo(custoDesperdicioEsperado);
+
+        // Custo com energia
+        BigDecimal custoEnergia = meuOrcamento.custoEnergia();
+        BigDecimal custoEnergiaEsperado = new BigDecimal("0.16");
+        assertThat(custoEnergia).isEqualByComparingTo(custoEnergiaEsperado);
+
+        // Custo da depreciação
+        BigDecimal custoDepreciacao = meuOrcamento.custoDepreciacao();
+        BigDecimal custoDepreciacaoEsperado = new BigDecimal("0.29");
+        assertThat(custoDepreciacao).isEqualByComparingTo(custoDepreciacaoEsperado);
+
+        // Custo base
+        BigDecimal custoBase = meuOrcamento.custoBase();
+        BigDecimal custoBaseEsperado = new BigDecimal("6.84");
+        assertThat(custoBase).isEqualByComparingTo(custoBaseEsperado);
+
+        // Custo com o acabamento
+        BigDecimal custoAcabamento = meuOrcamento.custoAcabamento();
+        BigDecimal custoAcabamentoEsperado = new BigDecimal("15.00");
+        assertThat(custoAcabamento).isEqualByComparingTo(custoAcabamentoEsperado);
+
+        // Custo com consumíveis
+        BigDecimal custoConsumiveis = meuOrcamento.custoConsumiveis();
+        BigDecimal custoConsumiveisEsperado = new BigDecimal("0.19");
+        assertThat(custoConsumiveis).isEqualByComparingTo(custoConsumiveisEsperado);
+
+        // Tempo de impressão
+        BigDecimal tempoImpressao = meuOrcamento.tempoImpressaoHoras();
+        BigDecimal tempoImpressaoEsperado = new BigDecimal("2.0833");
+        assertThat(tempoImpressao).isEqualByComparingTo(tempoImpressaoEsperado);
+
+        // Consumo de energia em kWh
+        BigDecimal consumoEnergia = meuOrcamento.consumoEnergiaKwh();
+        BigDecimal consumoEnergiaEsperado = new BigDecimal("0.1639");
+        assertThat(consumoEnergia).isEqualByComparingTo(consumoEnergiaEsperado);
+
+        // Fator de lucro
+        BigDecimal fatorLucro = meuOrcamento.fatorLucro();
+        BigDecimal fatorLucroEsperado = new BigDecimal("3.5000");
+        assertThat(fatorLucro).isEqualByComparingTo(fatorLucroEsperado);
+
+        // Filamentos
+        List<CustoFilamentoDto> filamentos = meuOrcamento.filamentos();
+        assertThat(filamentos).hasSize(1);
+
+        CustoFilamentoDto filamentoUsado = filamentos.getFirst();
+
+        String filamentoUsadoCor = filamentoUsado.cor();
+        String filamentoUsadoCorEsperado = "Preto";
+
+        String filamentoUsadoMaterial = filamentoUsado.material();
+        String filamentoUsadoMaterialEsperado = "PETG";
+
+        BigDecimal filamentoUsadoGramas = filamentoUsado.gramas();
+        BigDecimal filamentoUsadoGramasEsperado = new BigDecimal("85");
+
+        BigDecimal filamentoUsadoCusto = filamentoUsado.custo();
+        BigDecimal filamentoUsadoCustoEsperado = new BigDecimal("6.20");
+
+        assertThat(filamentoUsadoCor).isEqualTo(filamentoUsadoCorEsperado);
+        assertThat(filamentoUsadoMaterial).isEqualTo(filamentoUsadoMaterialEsperado);
+        assertThat(filamentoUsadoGramas).isEqualByComparingTo(filamentoUsadoGramasEsperado);
+        assertThat(filamentoUsadoCusto).isEqualByComparingTo(filamentoUsadoCustoEsperado);
     }
 }
