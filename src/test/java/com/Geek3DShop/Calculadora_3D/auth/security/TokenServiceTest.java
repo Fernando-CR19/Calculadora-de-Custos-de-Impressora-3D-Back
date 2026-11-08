@@ -93,4 +93,21 @@ class TokenServiceTest {
 
         assertThat(resultadoValidacao).isNotPresent();
     }
+
+    @Test
+    void deveRejeitarTokenAssinadoComOutraChave() {
+        UUID uuidUsuario = UUID.randomUUID();
+        Usuario usuario = Usuario.builder()
+                .papel(Papel.USUARIO)
+                .build();
+        usuario.setUuid(uuidUsuario);
+
+        String tokenGerado = tokenService.generateToken(usuario);
+
+        TokenService tokenServiceComOutraChave = new TokenService("TokenTesteInvalido");
+
+        Optional<String> resultadoValidacao = tokenServiceComOutraChave.validateToken(tokenGerado);
+
+        assertThat(resultadoValidacao).isNotPresent();
+    }
 }
