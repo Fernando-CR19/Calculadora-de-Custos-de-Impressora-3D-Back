@@ -110,4 +110,13 @@ class TokenServiceTest {
 
         assertThat(resultadoValidacao).isNotPresent();
     }
+
+    @Test
+    void deveRejeitarUmTextoQueNaoEhUmToken() {
+        String textoQualquer = "TeXTo.nAoEUm.toKeNValIDO";
+
+        Optional<String> resultadoValidacao = tokenService.validateToken(textoQualquer);
+
+        assertThat(resultadoValidacao).isNotPresent();
+    }
 }
