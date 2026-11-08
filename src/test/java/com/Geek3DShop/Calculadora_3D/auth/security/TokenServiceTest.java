@@ -57,4 +57,40 @@ class TokenServiceTest {
         assertThat(jwtDecodificado.getIssuer()).isEqualTo("Calculadora-3D");
         assertThat(jwtDecodificado.getExpiresAtAsInstant()).isCloseTo(expiracaoEsperada, within(2, ChronoUnit.SECONDS));
     }
+
+    @Test
+    void deveRejeitarTokenGuestComPayloadAdminReaproveitado() {
+        UUID uuidGuest = UUID.randomUUID();
+        Usuario usuarioGuest = Usuario.builder()
+                .papel(Papel.GUEST)
+                .build();
+        usuarioGuest.setUuid(uuidGuest);
+
+        String tokenGuest = tokenService.generateToken(usuarioGuest);
+
+        int primeiroPontoGuest = tokenGuest.indexOf(".");
+        int segundoPontoGuest = tokenGuest.indexOf(".", primeiroPontoGuest + 1);
+
+        String headerGuest = tokenGuest.substring(0, primeiroPontoGuest);
+        String assinaturaGuest = tokenGuest.substring(segundoPontoGuest + 1);
+
+        UUID uuidAdmin = UUID.randomUUID();
+        Usuario usuarioAdmin = Usuario.builder()
+                .papel(Papel.ADMIN)
+                .build();
+        usuarioAdmin.setUuid(uuidAdmin);
+
+        String tokenAdmin = tokenService.generateToken(usuarioAdmin);
+
+        int primeiroPontoAdmin = tokenAdmin.indexOf(".");
+        int segundoPontoAdmin = tokenAdmin.indexOf(".", primeiroPontoAdmin + 1);
+
+        String payloadAdmin = tokenAdmin.substring(primeiroPontoAdmin + 1, segundoPontoAdmin);
+
+        String tokenAlterado = headerGuest + "." + payloadAdmin + "." + assinaturaGuest;
+
+        Optional<String> resultadoValidacao = tokenService.validateToken(tokenAlterado);
+
+        assertThat(resultadoValidacao).isNotPresent();
+    }
 }
