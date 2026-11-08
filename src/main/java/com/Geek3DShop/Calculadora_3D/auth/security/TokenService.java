@@ -13,10 +13,13 @@ import java.util.Optional;
 
 @Service
 public class TokenService {
-    @Value("${JWT_SECRET}")
-    private String secret;
+    private final String secret;
 
     private static final String ISSUER = "Calculadora-3D";
+
+    public TokenService(@Value("${JWT_SECRET}") String secret) {
+        this.secret = secret;
+    }
 
     public String generateToken(Usuario usuario) {
         Instant now = Instant.now();
