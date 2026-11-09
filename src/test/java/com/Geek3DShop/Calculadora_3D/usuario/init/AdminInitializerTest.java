@@ -6,7 +6,6 @@ import com.Geek3DShop.Calculadora_3D.usuario.service.UsuarioService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,6 +27,25 @@ class AdminInitializerTest {
         String adminSenha = "AdminSenhaTeste";
 
         when(usuarioRepository.existsByPapel(Papel.ADMIN)).thenReturn(true);
+
+        AdminInitializer adminInitializer = new AdminInitializer(usuarioService, usuarioRepository, adminNome, adminUsuario, adminSenha);
+
+        // EXECUTA
+        adminInitializer.run(null);
+
+        // VERIFICA
+        verify(usuarioRepository, times(1)).existsByPapel(Papel.ADMIN);
+        verify(usuarioService, never()).createUsuario(any(), any());
+    }
+
+    @Test
+    void naoDeveCriarAdminQuandoFaltamVariaveis() {
+        // PREPARA
+        String adminNome = "";
+        String adminUsuario = "AdminUsuarioTeste";
+        String adminSenha = "AdminSenhaTeste";
+
+        when(usuarioRepository.existsByPapel(Papel.ADMIN)).thenReturn(false);
 
         AdminInitializer adminInitializer = new AdminInitializer(usuarioService, usuarioRepository, adminNome, adminUsuario, adminSenha);
 
