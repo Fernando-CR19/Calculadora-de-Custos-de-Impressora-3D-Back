@@ -12,8 +12,7 @@ public record OrcamentoRequestDto(
         UUID uuidImpressora,
 
         @NotEmpty(message = "Informe ao menos um filamento")
-        @Valid
-        List<FilamentoUsadoDto> filamentos,
+        List<@Valid FilamentoUsadoDto> filamentos,
 
         @Min(value = 0, message = "As horas de impressão não podem ser negativas")
         Integer horasDeImpressao,
