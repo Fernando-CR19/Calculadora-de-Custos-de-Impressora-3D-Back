@@ -56,4 +56,23 @@ class AdminInitializerTest {
         verify(usuarioRepository, times(1)).existsByPapel(Papel.ADMIN);
         verify(usuarioService, never()).createUsuario(any(), any());
     }
+
+    @Test
+    void deveCriarAdminCasoNaoExistaEVariaveisEstejamPresentes() {
+        // PREPARA
+        String adminNome = "AdminNomeTeste";
+        String adminUsuario = "AdminUsuarioTeste";
+        String adminSenha = "AdminSenhaTeste";
+
+        when(usuarioRepository.existsByPapel(Papel.ADMIN)).thenReturn(false);
+
+        AdminInitializer adminInitializer = new AdminInitializer(usuarioService, usuarioRepository, adminNome, adminUsuario, adminSenha);
+
+        // EXECUTA
+        adminInitializer.run(null);
+
+        // VERIFICA
+        verify(usuarioRepository, times(1)).existsByPapel(Papel.ADMIN);
+        verify(usuarioService, times(1)).createUsuario(any(), eq(Papel.ADMIN));
+    }
 }
