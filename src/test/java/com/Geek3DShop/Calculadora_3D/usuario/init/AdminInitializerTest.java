@@ -1,10 +1,13 @@
 package com.Geek3DShop.Calculadora_3D.usuario.init;
 
+import com.Geek3DShop.Calculadora_3D.usuario.dto.CreateUsuarioRequestDto;
 import com.Geek3DShop.Calculadora_3D.usuario.entity.Papel;
 import com.Geek3DShop.Calculadora_3D.usuario.repository.UsuarioRepository;
 import com.Geek3DShop.Calculadora_3D.usuario.service.UsuarioService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -18,6 +21,9 @@ class AdminInitializerTest {
 
     @Mock
     private UsuarioRepository usuarioRepository;
+
+    @Captor
+    private ArgumentCaptor<CreateUsuarioRequestDto> usuarioDtoCaptor;
 
     @Test
     void naoDeveCriarAdminQuandoJaExiste() {
@@ -73,6 +79,11 @@ class AdminInitializerTest {
 
         // VERIFICA
         verify(usuarioRepository, times(1)).existsByPapel(Papel.ADMIN);
-        verify(usuarioService, times(1)).createUsuario(any(), eq(Papel.ADMIN));
+        verify(usuarioService, times(1)).createUsuario(usuarioDtoCaptor.capture(), eq(Papel.ADMIN));
+
+        CreateUsuarioRequestDto dtoCapturado = usuarioDtoCaptor.getValue();
+        assertThat(dtoCapturado.nome()).isEqualTo(adminNome);
+        assertThat(dtoCapturado.nomeUsuario()).isEqualTo(adminUsuario);
+        assertThat(dtoCapturado.senha()).isEqualTo(adminSenha);
     }
 }
