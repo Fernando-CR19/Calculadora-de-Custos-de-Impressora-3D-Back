@@ -8,16 +8,16 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfiguration implements WebMvcConfigurer {
 
-    private final String allowedOrigin;
+    private final String[] allowedOrigins;
 
-    public WebConfiguration(@Value("${URL_FRONT}") String allowedOrigin) {
-        this.allowedOrigin = allowedOrigin;
+    public WebConfiguration(@Value("${URL_FRONT}") String[] allowedOrigins) {
+        this.allowedOrigins = allowedOrigins;
     }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins(allowedOrigin)
+                .allowedOrigins(allowedOrigins)
                 .allowedMethods("GET", "POST", "PUT", "DELETE");
     }
 }
